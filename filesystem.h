@@ -13,9 +13,11 @@ typedef struct file_register{
 typedef struct Block *Free_blocks_list;
 
 struct Block{
-	void *memory_address;
+	//void devuelve un puntero a una dirección de memoria
+	void *memory_address; //ID mejor?
 	int block_size; //¿?
 	Free_blocks_list next;
+	
 	file_register files[32];
 };
 
@@ -32,7 +34,7 @@ struct Inode{
 
 //superbloque
 struct superblock{
-	int size;
+	++int size;
 	long free_blocks;
 	Free_block_list free_block_list;
 	Block next_free_block;
