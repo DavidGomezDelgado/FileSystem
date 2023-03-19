@@ -7,7 +7,7 @@
 
 //Preguntar
 //Es muy reutilizable
-Inode buscarInode(char *nombre, Inode raiz, Block block){
+Inode buscarInode(char *nombre,struct Inode raiz, struct Block block){
 	Inode objetivo;
 	int i = 0;
 	int encontrado = 0;
