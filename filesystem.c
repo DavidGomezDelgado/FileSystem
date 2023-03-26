@@ -1,16 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "filesystem.h"
 
 
 
+static struct Inode *_buscarInode(char *nombre, struct Inode dir, uint8_t *encontrado){
+	
+	return NULL;
+}
 
-//Preguntar
 //Es muy reutilizable
-Inode buscarInode(char *nombre,struct Inode raiz, struct Block block){
-	Inode objetivo;
+static struct Inode *buscarInode(char *nombre,struct Inode raiz){
+	//Inode objetivo;
 	int i = 0;
-	int encontrado = 0;
+	uint8_t encontrado = 0;
 	while(i < N_DIRECTOS && encontrado){
 		
 		
