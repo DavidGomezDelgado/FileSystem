@@ -3,8 +3,22 @@
 #include <stdint.h>
 #include "filesystem.h"
 
+static struct inode *inode_serach (char *target, struct inode directory)
+{
+	uint8_t found = 0;
+	return _inode_serach (target, directory, &found);
+}
+
+static struct inode *_inode_serach (char *target, struct inode directory, uint8_t *found)
+{
+	int i = 0;
+	while (1 < N_DIRECTOS && !found && directory.i_directos[0] != NULL) {
+
+	}
+}
 
 
+/*
 static struct Inode *_buscarInode(char *nombre, struct Inode dir, uint8_t *encontrado){
 	
 	return NULL;
@@ -38,3 +52,4 @@ void crearFichero(Inode raiz, char nombreFich){
 	}
 	
 }
+*/

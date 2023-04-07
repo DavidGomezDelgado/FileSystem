@@ -11,7 +11,7 @@ typedef struct {
 	//int id_node;
 	char name[24];
 	struct Inode *file;
-}directory_entry;
+} directory_entry;
 
 //Lista de bloques libres
 typedef struct Block *Free_blocks_list; //Lista de bloques libres
@@ -19,11 +19,12 @@ typedef struct Block *Free_blocks_list; //Lista de bloques libres
 //Descriptor de bloque
 struct Block{
 	//void devuelve un puntero a una dirección de memoria
-	void *memory_address; //ID mejor?
-	int block_size; //¿?
+	void *memory_address;
+	int block_size;
 	Free_blocks_list next;
 };
 
+// Lista de inodos libres
 typedef struct Inode *Free_inodes_list;
 
 struct Inode{
@@ -41,10 +42,10 @@ struct Inode{
 struct superblock{
 	int size;
 	long free_blocks;
-	Free_block_list free_block_list;
+	Free_blocks_list free_block_list;
 	struct Block next_free_block;
 	long inode_list_size;
-	Free_inode_list  free_inodes_list;
+	Free_inodes_list  free_inodes_list;
 	struct Inode next_free_inode;
 	unsigned char MODIFIED;
 };
@@ -52,7 +53,7 @@ struct superblock{
 //BITMAP DE BLOQUES
 struct block_bitmap{
 	unsigned char bitmap[NUM_BLOCKS/8]; // Se divide entre 3 porque cada byte tiene 8 bits, por lo que sería un array de 125 bytes-
-};
+}; 
 
 //BITMAP DE INODOS
 struct inode_bitmap{
