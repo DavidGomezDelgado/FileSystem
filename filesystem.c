@@ -9,7 +9,7 @@ static struct inode *inode_serach (char *target, struct inode directory)
 	return _inode_serach (target, directory, &found);
 }
 
-static struct inode *_inode_serach (char *target, struct inode directory, uint8_t *found)
+static struct inode *_inode_search (char *target, struct inode directory, uint8_t *found)
 {
 	int i = 0;
 	while (1 < N_DIRECTOS && !found && directory.i_directos[0] != NULL) {

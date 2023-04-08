@@ -1,5 +1,5 @@
 #define N_DIRECTOS 10
-//#define N_SIMPLE  1
+#define N_SIMPLES  1
 //#define N_DOBLES 1
 //#define N_TRIPLES 1
 
@@ -8,16 +8,15 @@
 
 
 typedef struct {
-	//int id_node;
 	char name[24];
-	struct Inode *file;
+	struct Inode *inode;
 } directory_entry;
 
 //Lista de bloques libres
 typedef struct Block *Free_blocks_list; //Lista de bloques libres
 
 //Descriptor de bloque
-struct Block{
+struct block{
 	//void devuelve un puntero a una dirección de memoria
 	void *memory_address;
 	int block_size;
@@ -25,28 +24,27 @@ struct Block{
 };
 
 // Lista de inodos libres
-typedef struct Inode *Free_inodes_list;
+typedef struct inode *Free_inodes_list;
 
-struct Inode{
+struct inode{
+	int i_num;
+	char i_name[24];
 	char i_type;
 	int i_tam;
-	//int i_permission;,
+	//int i_permission;
 	int i_directos[N_DIRECTOS]; //320 direcciones
-	//int i_simple_ind[N_SIMPLES];
+	int i_simple_ind[N_SIMPLES];
 	//int i_doubles_ind[N_DOBLES];
 	//int i_triple_ind[N_TRIPLES];
-	char i_relleno[20];
+	//char i_relleno[20];
 };
 
 //superbloque
 struct superblock{
-	int size;
 	long free_blocks;
 	Free_blocks_list free_block_list;
-	struct Block next_free_block;
 	long inode_list_size;
 	Free_inodes_list  free_inodes_list;
-	struct Inode next_free_inode;
 	unsigned char MODIFIED;
 };
 
@@ -59,3 +57,5 @@ struct block_bitmap{
 struct inode_bitmap{
 	unsigned char bitmap[NUM_INODES / 8];
 };
+
+
