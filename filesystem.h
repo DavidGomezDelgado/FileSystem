@@ -26,7 +26,7 @@ struct block{
 // Lista de inodos libres
 typedef struct inode *free_inodes_list;
 
-struct inode{
+struct inode_fs{
 	int i_num;
 	char i_name[24];
 	char i_type;
@@ -57,5 +57,26 @@ struct block_bitmap{
 struct inode_bitmap{
 	unsigned char bitmap[NUM_INODES / 8];
 };
+
+/*********************************************************************************************
+ * 							FUNCTIONS									
+ * ******************************************************************************************/
+ 
+ //bitmap.c
+ int free_inode(struct inode_bitmap_fs *);
+ 
+ //create_inode.c
+ struct inode_fs *create_inode(char , char *, struct inode_bitmap_fs *);
+ struct inode_fs *create_root(struct inode_bitmap_fs *);
+ 
+ //file_manager.c
+ void touch (char *, char, char *, struct inode_fs *, struct inode_bitmap_fs *);
+ void print_directory(struct inode_fs);
+ 
+ //tree_manager.c
+ struct inode_fs *inode_search(char *, struct inode_fs *);
+ void insert(char *, struct inode_fs *, struct inode_fs);
+ 
+ #endif
 
 
