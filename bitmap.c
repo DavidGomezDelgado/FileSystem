@@ -2,12 +2,12 @@
 
 int free_inode(struct inode_bitmap *inode_bitmap){
 	int byte = 0;
-	//Encontrar el primer byte que no es 0xFF(el máximo)
+	// Encontrar el primer byte que no es 0xFF(el máximo)
 	while(byte < NUM_INODES/8 && ((*inode_bitmap).bitmap[byte]) == 0xFF){
 		byte++;
 	}
 	
-	//ahora buscamos el primer bit distinto de 0
+	// Ahora buscamos el primer bit igual a 0
 	int bit = 7;
 	
 	unsigned char aux = (*inode_bitmap).bitmap[byte];
@@ -15,6 +15,6 @@ int free_inode(struct inode_bitmap *inode_bitmap){
 		bit--;
 	}
 	
-	8
-	(*inode_bitmap)
+	// Ponemos bit a 1
+	(*inode_bitmap).bitmap[byte] |= (1 << bit)
 }

@@ -9,22 +9,22 @@
 
 typedef struct {
 	char name[24];
-	struct Inode *inode;
+	struct inode *inode;
 } directory_entry;
 
 //Lista de bloques libres
-typedef struct Block *Free_blocks_list; //Lista de bloques libres
+typedef struct block *free_blocks_list; //Lista de bloques libres
 
 //Descriptor de bloque
 struct block{
 	//void devuelve un puntero a una dirección de memoria
 	void *memory_address;
 	int block_size;
-	Free_blocks_list next;
+	free_blocks_list next;
 };
 
 // Lista de inodos libres
-typedef struct inode *Free_inodes_list;
+typedef struct inode *free_inodes_list;
 
 struct inode{
 	int i_num;
@@ -42,9 +42,9 @@ struct inode{
 //superbloque
 struct superblock{
 	long free_blocks;
-	Free_blocks_list free_block_list;
+	free_blocks_list free_blocks_list;
 	long inode_list_size;
-	Free_inodes_list  free_inodes_list;
+	free_inodes_list  free_inodes_list;
 	unsigned char MODIFIED;
 };
 
