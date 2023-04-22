@@ -49,12 +49,12 @@ struct superblock{
 };
 
 //BITMAP DE BLOQUES
-struct block_bitmap{
+struct block_bitmap_fs{
 	unsigned char bitmap[NUM_BLOCKS/8]; // Se divide entre 3 porque cada byte tiene 8 bits, por lo que sería un array de 125 bytes-
 }; 
 
 //BITMAP DE INODOS
-struct inode_bitmap{
+struct inode_bitmap_fs{
 	unsigned char bitmap[NUM_INODES / 8];
 };
 
@@ -76,7 +76,6 @@ struct inode_bitmap{
  //tree_manager.c
  struct inode_fs *inode_search(char *, struct inode_fs *);
  void insert(char *, struct inode_fs *, struct inode_fs);
- 
- #endif
+
 
 

@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int free_inode(struct inode_bitmap *inode_bitmap){
+int free_inode(struct inode_bitmap_fs *inode_bitmap){
 	int byte = 0;
 	int inode;
 	

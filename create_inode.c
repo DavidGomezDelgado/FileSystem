@@ -10,7 +10,7 @@
 }*/
 
 /* Creación de un inodo */
-struct inode *create_inode (char type, char *name, struct inode_bitmap *i_bitmap){
+struct inode *create_inode (char type, char *name, struct inode_bitmap_fs *i_bitmap){
 	// Inicialización
 	struct inode *inodo = malloc (sizeof(struct inode_fs));   // malloc devuelve ptr
 	int directos[N_DIRECTOS];

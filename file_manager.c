@@ -5,4 +5,5 @@
 #include "filesystem.h"
 
 void touch (char nombre*, char type, char directory*, struct inode_fs *, struct inode_bitmap_fs *){
+	
 }
