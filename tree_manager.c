@@ -4,9 +4,9 @@
 #include <string.h>
 #include "filesystem.h"
 
-struct inode_fs *existe_inode(char *name, directory_entry entry){
+struct inode_fs *existe_inode(char *name, directory_entry *entry){
 	if(entry->inode->i_type == 'd'){
-		return inode_search(name,(* entry)->inode);
+		return inode_search(name, (*entry)->inode);
 	}else if(strcmp(name, entry->name) == 0){
 		return entry->inode;
 	}else if(entry == NULL){
