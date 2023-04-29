@@ -10,9 +10,9 @@
 }*/
 
 /* Creación de un inodo */
-struct inode *create_inode (char type, char *name, struct inode_bitmap_fs *i_bitmap){
+struct inode_fs *create_inode (char type, char *name, struct inode_bitmap_fs *i_bitmap){
 	// Inicialización
-	struct inode *inodo = malloc (sizeof(struct inode_fs));   // malloc devuelve ptr
+	struct inode_fs *inodo = malloc (sizeof(struct inode_fs));   // malloc devuelve ptr
 	int directos[N_DIRECTOS];
 	int indirecto_simple[N_SIMPLES];
 	inodo -> i_num = free_inode(i_bitmap);
@@ -26,7 +26,7 @@ struct inode *create_inode (char type, char *name, struct inode_bitmap_fs *i_bit
 }
 
 struct inode_fs *create_root(struct inode_bitmap_fs *i_bitmap){
-	struct inode *inodo = malloc (sizeof(struct inode_fs)); 
+	struct inode_fs *inodo = malloc (sizeof(struct inode_fs)); 
 	int directos[N_DIRECTOS];
 	int indirecto_simple[N_SIMPLES];
 	inodo -> i_num = free_inode(i_bitmap);
