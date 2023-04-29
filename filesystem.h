@@ -7,10 +7,10 @@
 #define NUM_INODES 1000
 
 
-typedef struct {
+typedef struct directory_entry{
 	char name[24];
-	struct inode *inode;
-} directory_entry;
+	struct inode_fs *inode;
+};
 
 //Lista de bloques libres
 typedef struct block *free_blocks_list; //Lista de bloques libres
@@ -66,12 +66,13 @@ struct inode_bitmap_fs{
  int free_inode(struct inode_bitmap_fs *);
  
  //create_inode.c
- struct inode_fs *create_inode(char , char *, struct inode_bitmap_fs *);
- struct inode_fs *create_root(struct inode_bitmap_fs *);
+ struct inode_fs *create_inode(char , char *, struct inode_bitmap_fs *, struct block_bitmap_fs *);
+ struct inode_fs *create_root(struct inode_bitmap_fs *, struct block_bitmap_fs *);
  
  //file_manager.c
- void touch (char *, char, char *, struct inode_fs *, struct inode_bitmap_fs *);
+ void touch (char *, char, char *, struct inode_fs *, struct inode_bitmap_fs *, struct block_bitmap_fs *);
  void print_directory(struct inode_fs);
+ void file_edit(char *, char *, struct inode_fs *, struct block_bitmap_fs *);
  
  //tree_manager.c
  struct inode_fs *inode_search(char *, struct inode_fs *);
