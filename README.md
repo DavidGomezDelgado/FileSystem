@@ -18,3 +18,9 @@
 - Crear hardlinks y softlinks (OPCIONAL).
 
 *** ANOTACIONES ***
+- 
+
+*** DUDAS ***
+- Fallo en memcpy.
+- Uso de la estructura block.
+- Función touch y edit_file.
