@@ -18,7 +18,6 @@
 - Crear hardlinks y softlinks (OPCIONAL).
 
 *** ANOTACIONES ***
-- 
 
 *** DUDAS ***
 - Fallo en memcpy.
