@@ -4,9 +4,9 @@
 #include <string.h>
 #include "filesystem.h"
 
-struct inode_fs *existe_inode(char *name, directory_entry *entry){
+private struct inode_fs *existe_inode(char *name, struct inode_fs entry){
 	if(entry->inode->i_type == 'd'){
-		return inode_search(name, (*entry)->inode);
+		return inode_search(name,(* entry)->inode);
 	}else if(strcmp(name, entry->name) == 0){
 		return entry->inode;
 	}else if(entry == NULL){
@@ -15,25 +15,25 @@ struct inode_fs *existe_inode(char *name, directory_entry *entry){
 }
 
 struct inode_fs *inode_search(char *name, struct inode_fs *directory){
-	struct inode_fs *inodo = malloc(sizeof(struct inode_fs));
+	inode_fs inodo = malloc(sizeof(struct inode_fs));
 	inodo = NULL;
 	int i,j;
-	directory_entry *entry = malloc(sizeof(directory_entry));
+	directory_entry *entry = malloc(sizeof(struct directory_entry);
 	//Comenzamos desde el directorio actual (directory) 
 	
 	//Miramos sus punteros directos y buscamos de manera recursiva
 	
 	//devolvemos el inodo encontrado
 	for(i = 0; i < N_DIRECTOS && directory->i_directos[i] != NULL; i++){
-		memcpy(entry, directory -> i_directos[i], sizeof(directory_entry));
+		memcpy(entry, directory.i_directos[i], sizeof(struct directory_entry));
 		for(j = 0; i < 32 && (*entry) == NULL; i++){
 			inodo = existe_inode(name, (*entry));
-			memcpy(entry, directory -> i_directos[i] + (sizeof(directory_entry)*j), sizeof(directory_entry));
+			memcpy(entry, directory.i_directos[i] + (sizeof(struct directory_entry)*j), sizeof(struct directory_entry));
 		}
 	}
 	//Buscamos en el puntero indirecto
 	if(inodo == NULL && i < (N_DIRECTOS-1)) {
-		memcpy(entry, directory -> i_simple_ind[1], sizeof(directory_entry));
+		memcpy(entry, directory.i_simple_ind[1], sizeof(struct directory_entry));
 		inodo = existe_inode(name, (*entry));
 	}
 	
