@@ -31,7 +31,7 @@ int free_inode(struct inode_bitmap_fs *inode_bitmap){
 
 int free_block(struct block_bitmap_fs *block_bitmap){
 	int byte = 0;
-	int block;
+	unsigned int block;
 	
 	// Encontrar el primer byte que no es 0xFF(el máximo)
 	while(byte < NUM_BLOCKS/8 && ((*block_bitmap).bitmap[byte]) == 0xFF){
@@ -50,6 +50,7 @@ int free_block(struct block_bitmap_fs *block_bitmap){
 	(*block_bitmap).bitmap[byte] |= (1 << bit);
 	
 	block = (byte * 8) + (7 - bit);
+	block_bitmap->map[block] = (uintptr_t) malloc (BLOCK_SIZE); //Pedimos un bloque de tamaño 1024
 	
 	return block;
 }

@@ -4,20 +4,18 @@
 #include <string.h>
 #include "filesystem.h"
 
-struct inode_fs *existe_inode(char *name, struct directory_entry entry){
-	if(entry.inode->i_type == 'd'){
-		return inode_search(name,entry.inode);
-	}else if(strcmp(name, entry.name) == 0){
+struct inode_fs *existe_inode(char *name, struct directory_entry entry, struct block_bitmap_fs *bitmapb){
+	if(strcmp(name, entry.name) == 0){
 		return entry.inode;
 	}else {
 		return NULL;
 	}
 }
 
-struct inode_fs *inode_search(char *name, struct inode_fs *directory){
+struct inode_fs *inode_search(char *name, struct inode_fs *directory, struct block_bitmap_fs *bitmapb){
 	struct inode_fs *inodo = malloc(sizeof(struct inode_fs));
 	inodo = NULL;
-	int i,j, k;
+	int i,j, k, finDirectos = 1;
 	struct directory_entry *entry = malloc(sizeof(struct directory_entry));
 	struct directory_entry *aux = malloc(sizeof(struct directory_entry));
 	//Comenzamos desde el directorio actual (directory) 
@@ -25,30 +23,30 @@ struct inode_fs *inode_search(char *name, struct inode_fs *directory){
 	//Miramos sus punteros directos y buscamos de manera recursiva
 	
 	//devolvemos el inodo encontrado
-	for(i = 0; i < N_DIRECTOS; i++){
+	for(i = 0; i < N_DIRECTOS && finDirectos; i++){
 		if(directory->i_directos[i] != -1){
-			for(j = 0; j < 32; j++){
-				memcpy(entry, directory->i_directos[i] + (sizeof(struct directory_entry)*j), sizeof(struct directory_entry));
-				if(entry->inode != NULL){
-					inodo = existe_inode(name, (*entry));
-					if(inodo != NULL){
+			for(j = 2; j < 3; j++){
+				memcpy(entry, bitmapb->map[directory->i_directos[i]] + (sizeof(struct directory_entry)*j), sizeof(struct directory_entry));
+				if((*entry).inode != NULL)
+					inodo = existe_inode(name, (*entry),bitmapb);
+				if(inodo != NULL){
 						break;
-					}
 				}
+
 			}
 		}
-		if(inodo != NULL)break;
-		if(directory->i_directos[i+1] == NULL) i = N_DIRECTOS;
+		if(directory->i_directos[i+1] == -1) finDirectos = 0;
+		if(inodo != NULL) break;
 	}
 
 	//TODO
 	//Buscamos en el puntero indirecto
-	if(inodo == NULL && i < (N_DIRECTOS-1)) {
+	/*if(inodo == NULL && i < (N_DIRECTOS-1)) {
 		//llegamos a un bloque con punteros a otros bloques
 		for(k = 0; k < 31; k++){
-			inodo = existe_inode(name, (*entry));
+			inodo = existe_inode(name, (*entry), bitmapb);
 		}
-	}
+	}*/
 	
 	free(entry);
 	free(aux);
