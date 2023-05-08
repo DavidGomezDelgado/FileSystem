@@ -4,12 +4,28 @@
 #include <string.h>
 #include "filesystem.h"
 
+void es_directorio(struct inode_fs *i_hijo, struct inode_fs *i_padre, struct block_bitmap_fs *bitmapb){
+	struct directory_entry *dir_contenido = malloc(sizeof(struct directory_entry));
+	strcpy(dir_contenido->name, ".");
+	dir_contenido->inode = i_hijo;
+	memcpy(bitmapb->map[i_hijo->i_directos[0]], dir_contenido, sizeof(struct directory_entry));
+	strcpy(dir_contenido->name, "..");
+	dir_contenido->inode = i_padre;
+	memcpy((bitmapb->map[i_hijo->i_directos[0]] + sizeof(struct directory_entry)), dir_contenido, sizeof(struct directory_entry));
+	free(dir_contenido);
+
+}
+
 void touch (char *nombre, char type, char *directory, struct inode_fs *inode, struct inode_bitmap_fs *bitmap, struct block_bitmap_fs *bitmapb){
 	if(strncmp(nombre, ".",1) == 0){
 		printf("El  nombre no puede empezar por .\n");
 	}else{
 		struct inode_fs *directorio = malloc(sizeof(struct inode_fs));
+		if(strcmp(directory, "/")){
 			directorio = inode_search(directory,inode,bitmapb);
+		}else{
+			directorio = inode;
+		}
 			struct directory_entry *dir_contenido = malloc(sizeof(struct directory_entry));
 			int i, j, encontrado = 0;
 			struct inode_fs *existente = malloc(sizeof(struct inode_fs));
@@ -19,9 +35,6 @@ void touch (char *nombre, char type, char *directory, struct inode_fs *inode, st
 			if(existente == NULL){
 				struct inode_fs *inodo = malloc(sizeof(struct inode_fs));
 				inodo = create_inode(type,nombre, bitmap, bitmapb);
-				if(type == 'f'){
-					//Guardar en la tabla de directorios padre el nombre y el inodo
-				}
 				//Miramos en todos sus punteros directos
 				for(i = 0; i < N_DIRECTOS && !encontrado; i++){
 					if(directorio->i_directos[i] != -1){
@@ -31,10 +44,10 @@ void touch (char *nombre, char type, char *directory, struct inode_fs *inode, st
 							if(dir_contenido->inode == NULL){
 								strcpy(dir_contenido->name, nombre);
 								dir_contenido->inode = inodo;
-								(bitmapb->map[directorio->i_directos[i]] + sizeof(struct directory_entry)*j) = dir_contenido;
+								memcpy((bitmapb->map[directorio->i_directos[i]] + sizeof(struct directory_entry)*j), dir_contenido, sizeof(struct directory_entry));
 								if(type == 'd'){
 									//Le decimos al nuevo inodo creado quién es su padre y quién es él
-									es_directorio(nombre, inodo, inode, bitmapb);
+									es_directorio(inodo, inode, bitmapb);
 								}
 								encontrado = 1;
 							}
@@ -47,7 +60,7 @@ void touch (char *nombre, char type, char *directory, struct inode_fs *inode, st
 						bitmapb->map[directorio->i_directos[i]] = dir_contenido;
 						if(type == 'd'){
 							//Le decimos al nuevo inodo creado quién es su padre y quién es él
-							es_directorio(nombre, inodo, inode, bitmapb);
+							es_directorio(inodo, inode, bitmapb);
 						}
 						encontrado = 1;
 					}

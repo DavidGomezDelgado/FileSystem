@@ -29,5 +29,13 @@ int main(){
 	touch("testtouch", 'f', "/", raiz, bitmap, bitmapb);
 	struct inode_fs *aux = inode_search("testtouch", raiz, bitmapb);
 	printf("Inodo buscado: \n Tam: %d\n Type: %c\n Numero: %d\n",(*aux).i_tam, (*aux).i_type, (*aux).i_num);
+	for(i = 0; i < N_DIRECTOS; i++) printf("%d\n", aux->i_directos[i]);
+
+	touch("testtouchd", 'd', "/", raiz, bitmap, bitmapb);
+	struct inode_fs *aux2 = inode_search("testtouchd", raiz, bitmapb);
+	printf("Inodo buscado d: \n Tam: %d\n Type: %c\n Numero: %d\n",(*aux2).i_tam, (*aux2).i_type, (*aux2).i_num);
+	for(i = 0; i < N_DIRECTOS; i++) printf("%d\n", aux2->i_directos[i]);
+
+	struct directory_entry raizdir = malloc(sizeof(struct directory_entry)) ;
 
 }

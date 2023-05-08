@@ -25,7 +25,7 @@ struct inode_fs *inode_search(char *name, struct inode_fs *directory, struct blo
 	//devolvemos el inodo encontrado
 	for(i = 0; i < N_DIRECTOS && finDirectos; i++){
 		if(directory->i_directos[i] != -1){
-			for(j = 2; j < 3; j++){
+			for(j = 2; j < 4; j++){
 				memcpy(entry, bitmapb->map[directory->i_directos[i]] + (sizeof(struct directory_entry)*j), sizeof(struct directory_entry));
 				if((*entry).inode != NULL)
 					inodo = existe_inode(name, (*entry),bitmapb);
