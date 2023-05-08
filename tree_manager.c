@@ -4,9 +4,9 @@
 #include <string.h>
 #include "filesystem.h"
 
-struct inode_fs *existe_inode(char *name, struct directory_entry entry, struct block_bitmap_fs *bitmapb){
-	if(strcmp(name, entry.name) == 0){
-		return entry.inode;
+struct inode_fs *existe_inode(char *name, struct directory_entry *entry, struct block_bitmap_fs *bitmapb){
+	if(strcmp(name, entry->name) == 0){
+		return entry->inode;
 	}else {
 		return NULL;
 	}
@@ -15,29 +15,76 @@ struct inode_fs *existe_inode(char *name, struct directory_entry entry, struct b
 struct inode_fs *inode_search(char *name, struct inode_fs *directory, struct block_bitmap_fs *bitmapb){
 	struct inode_fs *inodo = malloc(sizeof(struct inode_fs));
 	inodo = NULL;
-	int i,j, k, finDirectos = 1;
+	int i,j, k, finDirectos = 1, esIgual = 0;
 	struct directory_entry *entry = malloc(sizeof(struct directory_entry));
 	struct directory_entry *aux = malloc(sizeof(struct directory_entry));
+	struct directory_entry *aux2 = malloc(sizeof(struct directory_entry));
 	//Comenzamos desde el directorio actual (directory) 
 	
 	//Miramos sus punteros directos y buscamos de manera recursiva
 	
-	//devolvemos el inodo encontrado
-	for(i = 0; i < N_DIRECTOS && finDirectos; i++){
-		if(directory->i_directos[i] != -1){
+	//Estamos preguntando por si mismo?
+	memcpy(aux, bitmapb->map[directory->i_directos[0]]+sizeof(struct directory_entry), sizeof(struct directory_entry));
+	if(aux->inode->i_directos[0] != -1){
 			for(j = 2; j < 4; j++){
-				memcpy(entry, bitmapb->map[directory->i_directos[i]] + (sizeof(struct directory_entry)*j), sizeof(struct directory_entry));
-				if((*entry).inode != NULL)
-					inodo = existe_inode(name, (*entry),bitmapb);
+					memcpy(aux2, bitmapb->map[aux->inode->i_directos[0]] + (sizeof(struct directory_entry)*j), sizeof(struct directory_entry));
+				if((*aux2).inode != NULL)
+					inodo = existe_inode(name, aux2,bitmapb);
 				if(inodo != NULL){
-						break;
+					esIgual = 1;
+					break;
 				}
 
 			}
 		}
-		if(directory->i_directos[i+1] == -1) finDirectos = 0;
-		if(inodo != NULL) break;
+		for(i = 1; i < N_DIRECTOS && finDirectos; i++){
+			if(directory->i_directos[i] != -1){
+				for(j = 0; j < 31; j++){
+					memcpy(aux2, bitmapb->map[aux->inode->i_directos[i]] + (sizeof(struct directory_entry)*j), sizeof(struct directory_entry));
+					if((*aux2).inode != NULL)
+						inodo = existe_inode(name, aux2,bitmapb);
+					if(inodo != NULL){
+							esIgual = 1;
+							break;
+					}
+
+				}
+			}
+			if(inodo != NULL) break;
+		}
+
+	if(!esIgual){
+		//Intentar implementar en otra función auxiliar
+			//devolvemos el inodo encontrado
+			//Eficiencia para saltarnos . y ..
+			if(directory->i_directos[0] != -1){
+				for(j = 2; j < 4; j++){
+						memcpy(entry, bitmapb->map[directory->i_directos[0]] + (sizeof(struct directory_entry)*j), sizeof(struct directory_entry));
+					if((*entry).inode != NULL)
+						inodo = existe_inode(name, entry,bitmapb);
+					if(inodo != NULL){
+						break;
+					}
+
+				}
+			}
+			for(i = 1; i < N_DIRECTOS && finDirectos; i++){
+				if(directory->i_directos[i] != -1){
+					for(j = 0; j < 31; j++){
+						memcpy(entry, bitmapb->map[directory->i_directos[i]] + (sizeof(struct directory_entry)*j), sizeof(struct directory_entry));
+						if((*entry).inode != NULL)
+							inodo = existe_inode(name, entry,bitmapb);
+						if(inodo != NULL){
+								break;
+						}
+
+					}
+				}
+				if(directory->i_directos[i+1] == -1) finDirectos = 0;
+				if(inodo != NULL) break;
+			}
 	}
+
 
 	//TODO
 	//Buscamos en el puntero indirecto
@@ -50,6 +97,7 @@ struct inode_fs *inode_search(char *name, struct inode_fs *directory, struct blo
 	
 	free(entry);
 	free(aux);
+	free(aux2);
 	return inodo;
 }
 

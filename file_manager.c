@@ -24,7 +24,7 @@ void touch (char *nombre, char type, char *directory, struct inode_fs *inode, st
 		if(strcmp(directory, "/")){
 			directorio = inode_search(directory,inode,bitmapb);
 		}else{
-			directorio = inode;
+			memcpy(directorio, inode, sizeof(struct inode_fs));
 		}
 			struct directory_entry *dir_contenido = malloc(sizeof(struct directory_entry));
 			int i, j, encontrado = 0;
@@ -73,7 +73,7 @@ void touch (char *nombre, char type, char *directory, struct inode_fs *inode, st
 			}else{
 				printf("Ya existe un fichero o directorio con ese nombre");
 			}
-			free(directorio);
+			//free(directorio);
 			//free(dir_contenido);
 			free(existente);
 	}

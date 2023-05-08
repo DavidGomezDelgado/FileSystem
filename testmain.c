@@ -36,6 +36,29 @@ int main(){
 	printf("Inodo buscado d: \n Tam: %d\n Type: %c\n Numero: %d\n",(*aux2).i_tam, (*aux2).i_type, (*aux2).i_num);
 	for(i = 0; i < N_DIRECTOS; i++) printf("%d\n", aux2->i_directos[i]);
 
-	struct directory_entry raizdir = malloc(sizeof(struct directory_entry)) ;
+	struct directory_entry *raizdir = malloc(sizeof(struct directory_entry)) ;
+	for(int i = 0; i < 4; i++){
+		memcpy(raizdir, (bitmapb->map[raiz->i_directos[0]]+sizeof(struct directory_entry)*i), sizeof(struct directory_entry));
+		printf("Entrada raiz %d: Nombre: %s, %d\n",i, raizdir->name, raizdir->inode->i_num);
+	}
+	free(raizdir);
 
+	struct directory_entry *directorio = malloc(sizeof(struct directory_entry)) ;
+		for(int i = 0; i < 2; i++){
+			memcpy(directorio , (bitmapb->map[aux2->i_directos[0]]+sizeof(struct directory_entry)*i), sizeof(struct directory_entry));
+			printf("Entrada testtouchd %d: Nombre: %s, %d\n",i, directorio->name, directorio->inode->i_num);
+		}
+	free(directorio);
+
+	touch("testtouchd2", 'd', "testtouchd", aux2, bitmap, bitmapb);
+		struct inode_fs *aux3 = inode_search("testtouchd2", aux2, bitmapb);
+		printf("Inodo buscado d2: \n Tam: %d\n Type: %c\n Numero: %d\n",(*aux3).i_tam, (*aux3).i_type, (*aux3).i_num);
+		for(i = 0; i < N_DIRECTOS; i++) printf("%d\n", aux3->i_directos[i]);
+
+		struct directory_entry *directorio2 = malloc(sizeof(struct directory_entry)) ;
+				for(int i = 0; i < 2; i++){
+					memcpy(directorio2 , (bitmapb->map[aux3->i_directos[0]]+sizeof(struct directory_entry)*i), sizeof(struct directory_entry));
+					printf("Entrada testtouchd2 %d: Nombre: %s, %d\n",i, directorio2->name, directorio2->inode->i_num);
+				}
+			free(directorio2);
 }
