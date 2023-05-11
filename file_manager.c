@@ -21,6 +21,7 @@ void touch (char *nombre, char type, char *directory, struct inode_fs *inode, st
 		printf("El  nombre no puede empezar por .\n");
 	}else{
 		struct inode_fs *directorio = malloc(sizeof(struct inode_fs));
+		//Creo que podemos quitar la primera condición
 		if(strcmp(directory, "/")){
 			directorio = inode_search(directory,inode,bitmapb);
 		}else{
@@ -49,6 +50,7 @@ void touch (char *nombre, char type, char *directory, struct inode_fs *inode, st
 									//Le decimos al nuevo inodo creado quién es su padre y quién es él
 									es_directorio(inodo, inode, bitmapb);
 								}
+								inode->i_tam += sizeof(struct directory_entry);
 								encontrado = 1;
 							}
 						}
@@ -80,5 +82,68 @@ void touch (char *nombre, char type, char *directory, struct inode_fs *inode, st
 
 	return;
 }
+
+void file_edit(char *contenido, char *nombre, /*char option,*/ struct inode_fs directory, struct block_bitmap_fs *bitmapb){
+	struct inode_fs *inodo = malloc(sizeof(struct inode_fs));
+	struct directory_entry *file_content = malloc(sizeof(struct directory_entry));
+	inodo = search_inode(nombre, directory);
+	int i, j;
+	if(inodo == NULL){
+		printf("No existe el fichero\n");
+		return;
+	}
+	//borramos contenido
+	for(int i = 0; i < N_DIRECTOS && inodo->i_directos[i] != NULL; i++){
+		for(int j = 0; j < 32 && inodo->i_directos[i] != NULL; j++){
+			//TODO
+			//estructura del contenido del fichero, no es directory_entry hay que crearla
+			memcpy(file_content, inodo->i_directos[i] + sizeof(char)*j, sizeof(char));
+			if(file_content == NULL){
+				break;
+			}else{
+				inodo->i_directos[i] + sizeof(char)*j = NULL;
+			}
+			//setear a NULL
+		}
+	}
+	//escribir el contenido
+
+	return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

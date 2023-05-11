@@ -62,8 +62,9 @@ int main(){
 				}
 			free(directorio2);
 	
+
 	// prueba rm
-	rm("hola", "/", raiz, bitmap, bitmapb);
-	rm("testtouch", "/", raiz, bitmap, bitmapb);
+	rm("hola", raiz, bitmap, bitmapb);
+	rm("testtouch", raiz, bitmap, bitmapb);
 	
 }

@@ -21,7 +21,6 @@ struct inode_fs *create_inode (char type, char *name, struct inode_bitmap_fs *i_
 	memset(indirecto_simple,-1, sizeof(int)*N_SIMPLES);
 	inodo -> i_num = free_inode(i_bitmap);
 	inodo -> i_type = type;
-	inodo -> i_tam = 0;
 	memcpy(inodo -> i_directos, directos, sizeof(int)*N_DIRECTOS);
 	memcpy(inodo -> i_simple_ind, indirecto_simple, sizeof(int)*N_SIMPLES);
 
@@ -29,10 +28,9 @@ struct inode_fs *create_inode (char type, char *name, struct inode_bitmap_fs *i_
 	if(inodo->i_type == 'd'){
 		bloque = free_block(i_bitmapb);
 		inodo->i_directos[0] = bloque;
-		//struct directory_entry *directory = malloc(sizeof(struct directory_entry));
-		//strcpy(directory->name, result);
-		//directory->inode = inodo;
-		//memcpy(i_bitmapb->map[bloque], directory, sizeof(struct directory_entry));
+		inodo -> i_tam = sizeof(struct directory_entry) * 2;
+	}else {
+		inodo -> i_tam = 0;
 	}
 	
 	return inodo;
@@ -47,7 +45,7 @@ struct inode_fs *create_root(struct inode_bitmap_fs *i_bitmap, struct block_bitm
 	unsigned int bloque;
 	inodo -> i_num = free_inode(i_bitmap);
 	inodo -> i_type = 'd';
-	inodo -> i_tam = 0;
+	inodo -> i_tam = sizeof(struct directory_entry) * 2;
 	memcpy(inodo -> i_directos, directos, sizeof(int)*N_DIRECTOS);
 	memcpy(inodo -> i_simple_ind, indirecto_simple, sizeof(int)*N_SIMPLES);
 	bloque = free_block(i_bitmapb);

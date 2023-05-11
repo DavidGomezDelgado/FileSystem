@@ -80,7 +80,10 @@ struct inode_bitmap_fs{
  
  //tree_manager.c
  struct inode_fs *inode_search(char *, struct inode_fs *, struct block_bitmap_fs *);
- void insert(char *, struct inode_fs *, struct inode_fs);
+ struct inode_fs *_inode_search(char *, char *, struct inode_fs, struct block_bitmap_fs);
+
+ //file_remove.c
+ void rm (char *, struct inode_fs *, struct inode_bitmap_fs *, struct block_bitmap_fs *);
 
 
 

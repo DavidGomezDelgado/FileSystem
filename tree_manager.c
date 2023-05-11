@@ -101,6 +101,11 @@ struct inode_fs *inode_search(char *name, struct inode_fs *directory, struct blo
 	return inodo;
 }
 
+struct inode_fs *_inode_search(char *name, char *path, struct inode_fs current_directory, struct block_bitmap_fs bitmapb){
+
+	return NULL;
+}
+
 
 /*char *path[24] = {"/"};
 	char aux[24];
