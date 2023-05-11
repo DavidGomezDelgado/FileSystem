@@ -61,4 +61,9 @@ int main(){
 					printf("Entrada testtouchd2 %d: Nombre: %s, %d\n",i, directorio2->name, directorio2->inode->i_num);
 				}
 			free(directorio2);
+	
+	// prueba rm
+	rm("hola", "/", raiz, bitmap, bitmapb);
+	rm("testtouch", "/", raiz, bitmap, bitmapb);
+	
 }

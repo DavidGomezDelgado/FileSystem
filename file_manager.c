@@ -15,7 +15,7 @@ void es_directorio(struct inode_fs *i_hijo, struct inode_fs *i_padre, struct blo
 	free(dir_contenido);
 
 }
-
+/* inode es el inodo del directorio raiz */
 void touch (char *nombre, char type, char *directory, struct inode_fs *inode, struct inode_bitmap_fs *bitmap, struct block_bitmap_fs *bitmapb){
 	if(strncmp(nombre, ".",1) == 0){
 		printf("El  nombre no puede empezar por .\n");
