@@ -61,7 +61,17 @@ int main(){
 					printf("Entrada testtouchd2 %d: Nombre: %s, %d\n",i, directorio2->name, directorio2->inode->i_num);
 				}
 			free(directorio2);
-	
+
+	file_edit("Vamos a probarlo", "testtouch", raiz, bitmapb);
+	printf("Inodo buscado: \n Tam: %d\n Type: %c\n Numero: %d\n",(*aux).i_tam, (*aux).i_type, (*aux).i_num);
+	for(i = 0; i < N_DIRECTOS; i++) printf("%d\n", aux->i_directos[i]);
+	printf("BloqueReal del fichero: %d \n", bitmapb->map[aux->i_directos[0]]);
+	int j;
+	for(i = 0; i < N_DIRECTOS && aux->i_directos[i] != -1; i++){
+		for(j = 0; j < BLOCK_SIZE; j++){
+			printf("%c", bitmapb->map[aux->i_directos[i]]+sizeof(char)*j);
+		}
+	}
 
 	// prueba rm
 	rm("hola", raiz, bitmap, bitmapb);

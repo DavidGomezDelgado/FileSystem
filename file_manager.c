@@ -83,31 +83,49 @@ void touch (char *nombre, char type, char *directory, struct inode_fs *inode, st
 	return;
 }
 
-void file_edit(char *contenido, char *nombre, /*char option,*/ struct inode_fs directory, struct block_bitmap_fs *bitmapb){
+void file_edit(char *contenido, char *nombre, struct inode_fs *directory, struct block_bitmap_fs *bitmapb){
+	char* cadena = malloc(BLOCK_SIZE);
 	struct inode_fs *inodo = malloc(sizeof(struct inode_fs));
-	struct directory_entry *file_content = malloc(sizeof(struct directory_entry));
-	inodo = search_inode(nombre, directory);
-	int i, j;
+	inodo = inode_search(nombre, directory, bitmapb);
+	int i, j, buffer = strlen(contenido), bloques;
+	char *posBlock;
 	if(inodo == NULL){
 		printf("No existe el fichero\n");
 		return;
 	}
 	//borramos contenido
-	for(int i = 0; i < N_DIRECTOS && inodo->i_directos[i] != NULL; i++){
-		for(int j = 0; j < 32 && inodo->i_directos[i] != NULL; j++){
+	for(int i = 0; i < N_DIRECTOS && inodo->i_directos[i] != -1; i++){
 			//TODO
-			//estructura del contenido del fichero, no es directory_entry hay que crearla
-			memcpy(file_content, inodo->i_directos[i] + sizeof(char)*j, sizeof(char));
-			if(file_content == NULL){
-				break;
-			}else{
-				inodo->i_directos[i] + sizeof(char)*j = NULL;
-			}
-			//setear a NULL
-		}
+				//setear a NULL
+				bitmapb->bitmap[inodo->i_directos[i]] = 0;
+				free(bitmapb->map[inodo->i_directos[i]]);
 	}
 	//escribir el contenido
+	inodo->i_tam = buffer;
+	if(buffer < BLOCK_SIZE){
+		for(j = 0; j< buffer; j++){
+			cadena[j] = contenido[j];
+		}
+	}else{
+		if(buffer%BLOCK_SIZE == 0){
+			bloques = buffer/BLOCK_SIZE;
+		}else{
+			bloques = buffer/BLOCK_SIZE +1;
+		}
+	}
+	//Reservamos el numero de bloques
+	for(i = 0; i < bloques; i++){
+		inodo->i_directos[i] = free_block(bitmapb);
+	}
 
+	i = 0;
+	for(j = 0; j < buffer; j++){
+		memcpy(bitmapb->map[inodo->i_directos[i]], cadena, BLOCK_SIZE);
+		if((j+1)%BLOCK_SIZE == 0 && j+1 != buffer){
+			i++;
+		}
+	}
+	free(cadena);
 	return;
 }
 
