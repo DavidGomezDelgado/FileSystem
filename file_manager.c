@@ -84,6 +84,7 @@ void touch (char *nombre, char type, char *directory, struct inode_fs *inode, st
 }
 
 void file_edit(char *contenido, char *nombre, struct inode_fs *directory, struct block_bitmap_fs *bitmapb){
+	/*
 	char* cadena = malloc(BLOCK_SIZE);
 	struct inode_fs *inodo = malloc(sizeof(struct inode_fs));
 	inodo = inode_search(nombre, directory, bitmapb);
@@ -126,39 +127,32 @@ void file_edit(char *contenido, char *nombre, struct inode_fs *directory, struct
 		}
 	}
 	free(cadena);
+	*/
+
+	struct inode_fs * i_fichero = inode_search(nombre, directory, bitmapb);
+	int tam_buffer = strlen(contenido);
+
+	if (i_fichero == NULL) {
+		printf("No existe el fichero %s\n", nombre);
+		return;
+	}
+
+	// Comprobamos que sea un fichero
+	if (i_fichero -> i_type != 'f') {
+		printf("%s es un directorio\n", nombre);
+	}
+
+	// Limpiamos el inodo del fichero
+	for(int i = 0; i < N_DIRECTOS && inodo->i_directos[i] != -1; i++){
+	//TODO
+		//setear a NULL
+		// bitmapb->bitmap[i_fichero->i_directos[i]] = 0;   // Tenemos que controlar bit a bit, no byte ??
+		// free(bitmapb->map[i_fichero->i_directos[i]]);   // ??
+
+	}
+
 	return;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
