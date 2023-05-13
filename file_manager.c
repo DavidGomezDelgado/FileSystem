@@ -143,7 +143,7 @@ void file_edit(char *contenido, char *nombre, struct inode_fs *directory, struct
 	}
 
 	// Limpiamos el inodo del fichero
-	for(int i = 0; i < N_DIRECTOS && inodo->i_directos[i] != -1; i++){
+	for(int i = 0; i < N_DIRECTOS && i_fichero->i_directos[i] != -1; i++){
 	//TODO
 		//setear a NULL
 		// bitmapb->bitmap[i_fichero->i_directos[i]] = 0;   // Tenemos que controlar bit a bit, no byte ??
