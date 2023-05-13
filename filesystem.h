@@ -76,7 +76,6 @@ struct inode_bitmap_fs{
  //file_manager.c
  void touch (char *, char, char *, struct inode_fs *, struct inode_bitmap_fs *, struct block_bitmap_fs *);
  void print_directory(struct inode_fs);
- void file_edit(char *, char *, struct inode_fs *, struct block_bitmap_fs *);
  void clean_inode(struct inode_fs *, struct block_bitmap_fs *);
  
  //tree_manager.c
@@ -86,5 +85,10 @@ struct inode_bitmap_fs{
  //file_remove.c
  void rm (char *, struct inode_fs *, struct inode_bitmap_fs *, struct block_bitmap_fs *);
 
+ //file_operations.c
+ void file_edit(char *, char *, struct inode_fs *, struct block_bitmap_fs *);
+ char *read_file(char *,struct inode_fs *, struct block_bitmap_fs *);
 
 
+ //directory_operations.c
+ char *read_directory(char *,struct inode_fs *, struct block_bitmap_fs *);

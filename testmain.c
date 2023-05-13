@@ -23,6 +23,7 @@ int main(){
 	fflush(stdout);
 	printf("BloqueReal: %llud \n", bitmapb->map[raiz->i_directos[0]]);
 	fflush(stdout);
+	read_directory("/", raiz, bitmapb);
 
 	// Creamos algunos inodos fichero
 	struct inode_fs *inodo = create_inode('f', "test1", bitmap, bitmapb);
@@ -107,13 +108,9 @@ int main(){
 	fflush(stdout);
 
 	int j;
-	for(i = 0; i < N_DIRECTOS && aux->i_directos[i] != -1; i++){
-		printf("%s\n", bitmapb->map[aux->i_directos[i]]);  // Creo que no estamos accedeindo a caracteres
-	}
+	read_file("testtouch", raiz, bitmapb);
 	file_edit("", "testtouch", raiz, bitmapb);
-	for(i = 0; i < N_DIRECTOS && aux->i_directos[i] != -1; i++){
-			printf("%s", bitmapb->map[aux->i_directos[i]]);  // Creo que no estamos accedeindo a caracteres
-	}
+	read_file("testtouch", raiz, bitmapb);
 
 	// prueba rm
 	rm("hola", raiz, bitmap, bitmapb);
@@ -121,12 +118,7 @@ int main(){
 	rm("testtouch", raiz, bitmap, bitmapb);
 
 	touch("hola","f", "/", raiz, bitmap, bitmapb);
-	struct directory_entry *raizdir2 = malloc(sizeof(struct directory_entry)) ;
-	for(int i = 0; i < 6; i++){  // Ejemplo con 4 bloques
-		memcpy(raizdir2, (bitmapb->map[raiz->i_directos[0]]+sizeof(struct directory_entry)*i), sizeof(struct directory_entry));
-		printf("Entrada raiz %d: Nombre: %s, %d\n",i, raizdir2->name, raizdir2->inode->i_num);
-	}
+	read_directory("/", raiz, bitmapb);
 	fflush(stdout);
-	free(raizdir2);
 
 }
