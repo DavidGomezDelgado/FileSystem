@@ -83,73 +83,58 @@ void touch (char *nombre, char type, char *directory, struct inode_fs *inode, st
 	return;
 }
 
+void clean_inode(struct inode_fs *inodo, struct block_bitmap_fs *bitmapb){
+	int bit, byte;
+	for(int i = 0; i < N_DIRECTOS && inodo->i_directos[i] != -1; i++){
+			//TODO
+			//setear a NULL
+			byte = inodo->i_directos[i] / 8;
+			bit = 7 - (inodo->i_directos[i] % 8);
+			bitmapb->bitmap[byte] = bitmapb->bitmap[byte] & ~ (1 << bit);
+			free(bitmapb->map[inodo->i_directos[i]]);
+			inodo->i_directos[i] = -1;
+	}
+}
+
 void file_edit(char *contenido, char *nombre, struct inode_fs *directory, struct block_bitmap_fs *bitmapb){
-	/*
 	char* cadena = malloc(BLOCK_SIZE);
 	struct inode_fs *inodo = malloc(sizeof(struct inode_fs));
 	inodo = inode_search(nombre, directory, bitmapb);
-	int i, j, buffer = strlen(contenido), bloques;
+	int i, j, buffer = strlen(contenido)+1, bloques;
 	char *posBlock;
 	if(inodo == NULL){
 		printf("No existe el fichero\n");
 		return;
 	}
 	//borramos contenido
-	for(int i = 0; i < N_DIRECTOS && inodo->i_directos[i] != -1; i++){
-			//TODO
-				//setear a NULL
-				bitmapb->bitmap[inodo->i_directos[i]] = 0;
-				free(bitmapb->map[inodo->i_directos[i]]);
-	}
+	clean_inode(inodo, bitmapb);
+
 	//escribir el contenido
 	inodo->i_tam = buffer;
 	if(buffer < BLOCK_SIZE){
 		for(j = 0; j< buffer; j++){
 			cadena[j] = contenido[j];
 		}
-	}else{
-		if(buffer%BLOCK_SIZE == 0){
-			bloques = buffer/BLOCK_SIZE;
-		}else{
-			bloques = buffer/BLOCK_SIZE +1;
-		}
 	}
+	cadena[buffer] = '\o';
+
+	if(buffer%BLOCK_SIZE == 0){
+			bloques = (buffer)/BLOCK_SIZE;
+	}else{
+			bloques = (buffer)/BLOCK_SIZE+1;
+	}
+
 	//Reservamos el numero de bloques
 	for(i = 0; i < bloques; i++){
 		inodo->i_directos[i] = free_block(bitmapb);
 	}
 
 	i = 0;
-	for(j = 0; j < buffer; j++){
+	for(j = 0; j < bloques; j++){
 		memcpy(bitmapb->map[inodo->i_directos[i]], cadena, BLOCK_SIZE);
-		if((j+1)%BLOCK_SIZE == 0 && j+1 != buffer){
-			i++;
-		}
+		i++;
 	}
 	free(cadena);
-	*/
-
-	struct inode_fs * i_fichero = inode_search(nombre, directory, bitmapb);
-	int tam_buffer = strlen(contenido);
-
-	if (i_fichero == NULL) {
-		printf("No existe el fichero %s\n", nombre);
-		return;
-	}
-
-	// Comprobamos que sea un fichero
-	if (i_fichero -> i_type != 'f') {
-		printf("%s es un directorio\n", nombre);
-	}
-
-	// Limpiamos el inodo del fichero
-	for(int i = 0; i < N_DIRECTOS && i_fichero->i_directos[i] != -1; i++){
-	//TODO
-		//setear a NULL
-		// bitmapb->bitmap[i_fichero->i_directos[i]] = 0;   // Tenemos que controlar bit a bit, no byte ??
-		// free(bitmapb->map[i_fichero->i_directos[i]]);   // ??
-
-	}
 
 	return;
 }

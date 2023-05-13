@@ -105,18 +105,28 @@ int main(){
 	fflush(stdout);
 	printf("BloqueReal del fichero: %llud \n", bitmapb->map[aux->i_directos[0]]);
 	fflush(stdout);
-/*
+
 	int j;
 	for(i = 0; i < N_DIRECTOS && aux->i_directos[i] != -1; i++){
-		for(j = 0; j < BLOCK_SIZE; j++){
-			printf("%c", bitmapb->map[aux->i_directos[i]]+sizeof(char)*j);  // Creo que no estamos accedeindo a caracteres
-		}
+		printf("%s\n", bitmapb->map[aux->i_directos[i]]);  // Creo que no estamos accedeindo a caracteres
 	}
-*/
-	/*
+	file_edit("", "testtouch", raiz, bitmapb);
+	for(i = 0; i < N_DIRECTOS && aux->i_directos[i] != -1; i++){
+			printf("%s", bitmapb->map[aux->i_directos[i]]);  // Creo que no estamos accedeindo a caracteres
+	}
+
 	// prueba rm
 	rm("hola", raiz, bitmap, bitmapb);
 	rm("testtouch", raiz, bitmap, bitmapb);
-	*/
-	
+	rm("testtouch", raiz, bitmap, bitmapb);
+
+	touch("hola","f", "/", raiz, bitmap, bitmapb);
+	struct directory_entry *raizdir2 = malloc(sizeof(struct directory_entry)) ;
+	for(int i = 0; i < 6; i++){  // Ejemplo con 4 bloques
+		memcpy(raizdir2, (bitmapb->map[raiz->i_directos[0]]+sizeof(struct directory_entry)*i), sizeof(struct directory_entry));
+		printf("Entrada raiz %d: Nombre: %s, %d\n",i, raizdir2->name, raizdir2->inode->i_num);
+	}
+	fflush(stdout);
+	free(raizdir2);
+
 }

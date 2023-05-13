@@ -77,6 +77,7 @@ struct inode_bitmap_fs{
  void touch (char *, char, char *, struct inode_fs *, struct inode_bitmap_fs *, struct block_bitmap_fs *);
  void print_directory(struct inode_fs);
  void file_edit(char *, char *, struct inode_fs *, struct block_bitmap_fs *);
+ void clean_inode(struct inode_fs *, struct block_bitmap_fs *);
  
  //tree_manager.c
  struct inode_fs *inode_search(char *, struct inode_fs *, struct block_bitmap_fs *);
