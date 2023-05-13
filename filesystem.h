@@ -33,7 +33,7 @@ struct inode_fs{
 	char i_type;
 	int i_tam;
 	//int i_permission;
-	int i_directos[N_DIRECTOS]; //320 direcciones
+	int i_directos[N_DIRECTOS]; //320 direcciones (32 bloques cada puntero)
 	int i_simple_ind[N_SIMPLES];
 	//int i_doubles_ind[N_DOBLES];
 	//int i_triple_ind[N_TRIPLES];
@@ -61,9 +61,9 @@ struct inode_bitmap_fs{
 };
 
 
-/*********************************************************************************************
- * 							FUNCTIONS									
- * ******************************************************************************************/
+/***************************************************************
+ * 							FUNCTIONS						   *
+ ***************************************************************/
  
  //bitmap.c
  int free_inode(struct inode_bitmap_fs *);
