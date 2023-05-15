@@ -92,6 +92,7 @@ void clean_inode(struct inode_fs *inodo, struct block_bitmap_fs *bitmapb){
 			bit = 7 - (inodo->i_directos[i] % 8);
 			bitmapb->bitmap[byte] = bitmapb->bitmap[byte] & ~ (1 << bit);
 			free(bitmapb->map[inodo->i_directos[i]]);
+			bitmapb->map[inodo->i_directos[i]] = 0;
 			inodo->i_directos[i] = -1;
 	}
 }

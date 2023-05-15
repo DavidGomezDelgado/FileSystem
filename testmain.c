@@ -26,29 +26,34 @@ int main(){
 	read_directory("/", raiz, bitmapb);
 
 	// Creamos algunos inodos fichero
-	struct inode_fs *inodo = create_inode('f', "test1", bitmap, bitmapb);
+	touch("test1", 'f', "/", raiz, bitmap, bitmapb);
+	struct inode_fs *inodo = inode_search("test1", raiz, bitmapb);
 	printf("Tam: %d\n Type: %c\n Numero: %d\n",(*inodo).i_tam, (*inodo).i_type, (*inodo).i_num);
 	fflush(stdout);
 	for(i = 0; i < N_DIRECTOS; i++) printf("%d\n", inodo->i_directos[i]);
 	fflush(stdout);
 
-	struct inode_fs *inodo2 = create_inode('f', "test2", bitmap,bitmapb);
+	touch("test2", 'f', "/", raiz, bitmap, bitmapb);
+	struct inode_fs *inodo2 = inode_search("test2", raiz, bitmapb);
 	printf("Tam: %d\n Type: %c\n Numero: %d\n",(*inodo2).i_tam,(*inodo2).i_type, (*inodo2).i_num);
 	fflush(stdout);
 	for(i = 0; i < N_DIRECTOS; i++) printf("%d\n", inodo2->i_directos[i]);
 	fflush(stdout);
 
 	// Creamos un inodo directorio
-	struct inode_fs *inodo3 = create_inode('d', "testd", bitmap,bitmapb);
+	touch("testd", 'd', "/", raiz, bitmap, bitmapb);
+	struct inode_fs *inodo3 = inode_search("testd", raiz, bitmapb);
 	printf("Tam: %d\n Type: %c\n Numero: %d\n",(*inodo3).i_tam, (*inodo3).i_type, (*inodo3).i_num);
-	fflush(stdout);
 	for(i = 0; i < N_DIRECTOS; i++) printf("%d\n", inodo3->i_directos[i]);
 	fflush(stdout);
 	printf("BloqueReal: %llud \n", bitmapb->map[inodo3->i_directos[0]]);
 	fflush(stdout);
-
+	read_directory("testd", raiz, bitmapb);
+	fflush(stdout);
 	// Creamos un fichero en / a partir de inodo raíz
 	touch("testtouch", 'f', "/", raiz, bitmap, bitmapb);
+	fflush(stdout);
+	read_directory("testd", raiz, bitmapb);
 	struct inode_fs *aux = inode_search("testtouch", raiz, bitmapb);
 	printf("Inodo buscado: \n Tam: %d\n Type: %c\n Numero: %d\n",(*aux).i_tam, (*aux).i_type, (*aux).i_num);
 	fflush(stdout);
@@ -56,6 +61,7 @@ int main(){
 	fflush(stdout);
 
 	// Creamos un directorio en / a partir de inodo raíz
+	read_directory("testd", raiz, bitmapb);
 	touch("testtouchd", 'd', "/", raiz, bitmap, bitmapb);
 	struct inode_fs *aux2 = inode_search("testtouchd", raiz, bitmapb);
 	printf("Inodo buscado d: \n Tam: %d\n Type: %c\n Numero: %d\n",(*aux2).i_tam, (*aux2).i_type, (*aux2).i_num);
@@ -65,10 +71,7 @@ int main(){
 
 	// Mostramos contenido del directorio /
 	struct directory_entry *raizdir = malloc(sizeof(struct directory_entry)) ;
-	for(int i = 0; i < 4; i++){  // Ejemplo con 4 bloques
-		memcpy(raizdir, (bitmapb->map[raiz->i_directos[0]]+sizeof(struct directory_entry)*i), sizeof(struct directory_entry));
-		printf("Entrada raiz %d: Nombre: %s, %d\n",i, raizdir->name, raizdir->inode->i_num);
-	}
+	read_directory("/", raiz, bitmapb);
 	fflush(stdout);
 	free(raizdir);
 
@@ -100,6 +103,7 @@ int main(){
 
 	// Escribimos en testtouch  TODO
 	file_edit("Vamos a probarlo", "testtouch", raiz, bitmapb);
+	//read_file("testtouch", raiz, bitmapb);
 	printf("Inodo buscado: \n Tam: %d\n Type: %c\n Numero: %d\n",(*aux).i_tam, (*aux).i_type, (*aux).i_num);
 	fflush(stdout);
 	for(i = 0; i < N_DIRECTOS; i++) printf("%d\n", aux->i_directos[i]);
@@ -109,16 +113,31 @@ int main(){
 
 	int j;
 	read_file("testtouch", raiz, bitmapb);
-	file_edit("", "testtouch", raiz, bitmapb);
+	read_directory("/", raiz, bitmapb);
+	file_edit("hola", "testtouch", raiz, bitmapb);
+	fflush(stdout); //El programa no puede editar y seguidamente leer, necesitamos vaciar el buffer primero, solo es necesario en el main
+	read_directory("/", raiz, bitmapb);
+	fflush(stdout);
 	read_file("testtouch", raiz, bitmapb);
 
 	// prueba rm
 	rm("hola", raiz, bitmap, bitmapb);
+	//read_directory("/", raiz, bitmapb);
+	rm("test1", raiz, bitmap, bitmapb);
+	rm("test1", raiz, bitmap, bitmapb);
+	read_directory("/", raiz, bitmapb);
+	fflush(stdout);
 	rm("testtouch", raiz, bitmap, bitmapb);
 	rm("testtouch", raiz, bitmap, bitmapb);
 
-	touch("hola","f", "/", raiz, bitmap, bitmapb);
 	read_directory("/", raiz, bitmapb);
+	touch("hola",'f', "/", raiz, bitmap, bitmapb);
+	touch("hola2",'f', "/", raiz, bitmap, bitmapb);
+	touch("hey",'d', "/", raiz, bitmap, bitmapb);
+	read_directory("/", raiz, bitmapb);
+	touch("hey",'d', "/", aux3, bitmap, bitmapb);
+	read_directory("testtouchd", raiz, bitmapb);
+	read_directory("testtouchd2", aux3, bitmapb);
 	fflush(stdout);
 
 }
