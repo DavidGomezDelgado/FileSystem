@@ -1,5 +1,5 @@
 #define N_DIRECTOS 10
-#define N_SIMPLES  1
+//#define N_SIMPLES  1
 //#define N_DOBLES 1
 //#define N_TRIPLES 1
 
@@ -14,40 +14,17 @@ typedef struct directory_entry{
 	struct inode_fs *inode;
 };
 
-//Lista de bloques libres
-typedef struct block *free_blocks_list; //Lista de bloques libres
 
-//Descriptor de bloque
-struct block{
-	//void devuelve un puntero a una dirección de memoria
-	void *memory_address;
-	int block_size;
-	free_blocks_list next;
-};
-
-// Lista de inodos libres
-typedef struct inode *free_inodes_list;
 
 struct inode_fs{
 	int i_num;
 	char i_type;
 	int i_tam;
-	//int i_permission;
+	int i_permisos;
 	int i_directos[N_DIRECTOS]; //320 direcciones (32 bloques cada puntero)
-	int i_simple_ind[N_SIMPLES];
-	//int i_doubles_ind[N_DOBLES];
-	//int i_triple_ind[N_TRIPLES];
-	//char i_relleno[20];
 };
 
-//superbloque
-struct superblock{
-	long free_blocks;
-	free_blocks_list free_blocks_list;
-	long inode_list_size;
-	free_inodes_list  free_inodes_list;
-	unsigned char MODIFIED;
-};
+
 
 //BITMAP DE BLOQUES
 struct block_bitmap_fs{

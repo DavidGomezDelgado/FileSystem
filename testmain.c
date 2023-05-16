@@ -10,7 +10,8 @@ int main(){
 	// Creamos mapas de bits
 	struct inode_bitmap_fs *bitmap = malloc(sizeof(struct inode_bitmap_fs));
 	struct block_bitmap_fs *bitmapb = malloc(sizeof(struct block_bitmap_fs));
-
+	struct inode_fs *example;
+	printf("%d", sizeof(example));
 	fflush(stdout);
 	printf("Creando algunos inodos...\n");
 	fflush(stdout);
