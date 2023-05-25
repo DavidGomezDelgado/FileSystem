@@ -10,19 +10,20 @@
 - Eliminar fichero (file_remove.c)
 - Eliminar inodo y dentry (file_remove.c)
 - Escribir (sobreescribir) en fichero (file_manager.c)
+- Renombrar fichero o directorio (file_operations.c)
 
 *** FUNCIONES A IMPLEMENTAR ***
-- Borrar directorio.  --> EN PROCESO DE PRUEBA
-- Modificar tamaño de fichero.
-- Cambiar nombre de fichero (también sirve para mover el fichero). -> DE MOMENTO SÓLO CAMBIAR NOMBRE
-- Leer de fichero.  --> EN PROCESO
+- Modificar tamaño de fichero (?).
 - Crear hardlinks y softlinks (OPCIONAL).
 
-*** TODO Y ANOTACIONES ***
-- Función leer de fichero.
-- Tener cuidado a la hora de manejar bitmap_bloques->bitmap. Manejamos bits, no bytes.
+*** TODO ***
 - Continuar con _inode_search().
 - Gestionar ficheros y directorios a partir de un path distinto al actual.
+- Deberíamos hacer "mini funciones" para compactar el código (SI HAY TIEMPO).
+
+*** ANOTACIONES ***
+- Tener cuidado a la hora de manejar bitmap_bloques->bitmap. Manejamos bits, no bytes.
 
 *** DUDAS ***
 - Bloques reales negativos.
+- Función modificar tamaño de fichero.
