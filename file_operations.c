@@ -72,19 +72,41 @@ char *read_file(char *nombre,struct inode_fs *directory, struct block_bitmap_fs 
 }
 
 
+/* Renombramos un fichero (o directorio) a partir de su nombre (name) en su directorio (directory) */
+/* Sólo cambiamos el nombre del registro de directorio (NO BORRAMOS ENTRY Y CREAMOS NUEVA, QUE SERÍA LO SUYO) */
 
+void rename_file(char *name, char *new_name, struct inode_fs *directory, struct block_bitmap_fs* bitmapb) {
+	// Comprobamos si existe el fichero o directorio
+	int i = 0;
+	int encontrado = 0;
+	int offset = 0;   // offset para desplazarnos por los bloques
+	struct inode_fs *inodo = inode_search(name, directory, bitmapb);
 
+	if (inodo == NULL) {
+		printf("No existe el fichero\n");
+		return;
+	}
 
+	// Buscamos la entrada de directorio
+	struct directory_entry *entry = malloc(sizeof(struct directory_entry));
 
+	while (i < N_DIRECTOS && (directory -> i_directos[i] != -1) && !encontrado) {
+		// Recorremos el bloque (32 entradas) de cada puntero directo del inodo
+		memcpy(entry, bitmapb -> map[directory -> i_directos[i] + offset], sizeof(struct directory_entry));
 
+		for (int j = 0; j < 32 && (entry -> inode != NULL) && !encontrado; j++) {
+			if (strcmp(entry -> name, name) == 0) {
+				// Hemos encontrado la entrada, cambiamos su nombre
+				strcpy(entry -> name, new_name);
+				encontrado = 1;
+			}
 
+			// MEJORA: en vez de cambiar el nombre a la entrada, eliminarla (setear a 0) y añadir nueva con new_name al mismo inodo
+		}
+	}
 
-
-
-
-
-
-
+	free(entry);
+}
 
 
 

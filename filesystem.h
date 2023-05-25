@@ -65,7 +65,7 @@ struct inode_bitmap_fs{
  //file_operations.c
  void file_edit(char *, char *, struct inode_fs *, struct block_bitmap_fs *);
  char *read_file(char *,struct inode_fs *, struct block_bitmap_fs *);
-
+ void rename_file(char *, char *, struct inode_fs *, struct block_bitmap_fs* );
 
 
  //directory_operations.c
