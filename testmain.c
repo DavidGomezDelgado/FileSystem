@@ -24,15 +24,19 @@ int main(){
 	fflush(stdout);
 	printf("BloqueReal: %llud \n", bitmapb->map[raiz->i_directos[0]]);
 	fflush(stdout);
-	read_directory("/", raiz, bitmapb);
+	// read_directory("/", raiz, bitmapb);
 
 	// Creamos algunos inodos fichero
 	touch("test1", 'f', "/", raiz, bitmap, bitmapb);
 	struct inode_fs *inodo = inode_search("test1", raiz, bitmapb);
 	printf("Tam: %d\n Type: %c\n Numero: %d\n",(*inodo).i_tam, (*inodo).i_type, (*inodo).i_num);
 	fflush(stdout);
-	for(i = 0; i < N_DIRECTOS; i++) printf("%d\n", inodo->i_directos[i]);
+	// for(i = 0; i < N_DIRECTOS; i++) printf("%d\n", inodo->i_directos[i]);
 	fflush(stdout);
+
+	printf("Renombramos test1...\n");
+	fflush(stdout);
+	rename_file("test1", "nuevo test", raiz, bitmapb);
 
 	touch("test2", 'f', "/", raiz, bitmap, bitmapb);
 	struct inode_fs *inodo2 = inode_search("test2", raiz, bitmapb);
@@ -120,6 +124,10 @@ int main(){
 	read_directory("/", raiz, bitmapb);
 	fflush(stdout);
 	read_file("testtouch", raiz, bitmapb);
+
+	// prueba rename
+	printf("renombramos testtouch...\n");
+	rename_file("testtouch", "nuevo test", raiz, bitmapb);
 
 	// prueba rm
 	rm("hola", raiz, bitmap, bitmapb);
