@@ -13,7 +13,7 @@
 - Renombrar fichero o directorio (file_operations.c)
 
 *** FUNCIONES A IMPLEMENTAR ***
-- Modificar tamaño de fichero (?).
+- Modificar tamaño de fichero -> truncate.
 - Crear hardlinks y softlinks (OPCIONAL).
 
 *** TODO ***
