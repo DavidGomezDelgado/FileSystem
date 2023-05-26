@@ -17,6 +17,7 @@
 - Crear hardlinks y softlinks (OPCIONAL).
 
 *** TODO ***
+- Modificar manejo de los bitmaps -> no accedemos a través de memoria, sino a través del fichero
 - Continuar con _inode_search().
 - Gestionar ficheros y directorios a partir de un path distinto al actual.
 - Deberíamos hacer "mini funciones" para compactar el código (SI HAY TIEMPO).
