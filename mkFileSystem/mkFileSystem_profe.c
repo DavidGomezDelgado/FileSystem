@@ -1,3 +1,8 @@
+
+/*
+ * Programa que inicializa nuestro filesystem (fichero con datos del filesystem)
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -10,6 +15,7 @@
 
 #define MAGIC_N 123456
 
+/* Estructura superbloque con metadatos y datos para movernos por el fichero */
 struct superblock_fs {
 	unsigned long magic_number;
 	unsigned long bitmapb_offset;
@@ -26,155 +32,163 @@ int main(int argc, char *argv[]){
 	struct superblock_fs *superblock;
 	struct block_bitmap_fs *bitmapb;
 	struct inode_bitmap_fs *bitmapi;
-	printf("%d\n", sizeof(struct superblock_fs));
+	printf("sizeof(struct superblock_fs): %d\n", sizeof(struct superblock_fs));
 
-	int pagesize = sysconf(_SC_PAGE_SIZE);
+	int pagesize = sysconf(_SC_PAGE_SIZE);  // Obtenemos tamaño de página del sistema
 
+	/* Comenzamos con la inicialización del fichero contenedor del filesystem */
 	file = open("filesystem.img", O_RDWR);
 	if (file == -1) {
 	   perror("open");
 	   exit(EXIT_FAILURE);
 	}
-	if (fstat(file,&statbuf) == -1){
+
+	/* Obtenemos datos del fichero */
+	if (fstat(file, &statbuf) == -1){
 		perror("stat");
 		exit(EXIT_FAILURE);
 	}
+
 	/*
 	statbuf.st_size
 	statbuf.st_blksize
 	statbuf.st_blocks
     */
 	
+	/* Mapeamos nuestro superbloque al fichero contenedor del filesystem */
+	superblock = mmap(NULL, BLOCK_SIZE, PROT_WRITE | PROT_READ, MAP_SHARED, file, 0);
+	if (superblock == MAP_FAILED) {
+		perror("Error al mapear el archivo");
+		close(file);
+		exit( EXIT_FAILURE);
+	}
 
-	superblock = mmap(NULL,BLOCK_SIZE,PROT_WRITE|PROT_READ,MAP_SHARED,file, 0);
-	 if (superblock == MAP_FAILED) {
-		 perror("Error al mapear el archivo");
-		 close(file);
-		 exit( EXIT_FAILURE);
-	 }
-	 superblock->magic_number = MAGIC_N;
-	 superblock->bitmapb_offset = BLOCK_SIZE; /* calcular el tamaño del bitmap dependiendo del tamaño del fichero */
-	 superblock->block_size = BLOCK_SIZE;
-	 superblock->num_blocks = NUM_BLOCKS;
-	 superblock->num_inodes = NUM_INODES;
-	 printf("%lu\n,%lu\n,%lu\n,%lu\n, %lu\n",superblock->magic_number, superblock->num_blocks, superblock->num_inodes, superblock->block_size, superblock->bitmapb_offset);
+	/* Inicializamos nuestro superbloque */
+	superblock -> magic_number = MAGIC_N;
+	superblock -> bitmapb_offset = BLOCK_SIZE; /* calcular el tamaño del bitmap dependiendo del tamaño del fichero */
+	superblock -> block_size = BLOCK_SIZE;
+	superblock -> num_blocks = NUM_BLOCKS;
+	superblock -> num_inodes = NUM_INODES;
+	printf("%lu\n,%lu\n,%lu\n,%lu\n, %lu\n",superblock->magic_number, superblock->num_blocks, superblock->num_inodes, superblock->block_size, superblock->bitmapb_offset);
 
 
-	 //movemos el puntero del fichero a donde apunta el offset
-	 unsigned long bitmap_offset = superblock->bitmapb_offset;
-//	 lseek(file, bitmap_offset, SEEK_SET);
-	 int size_bitmap = sizeof(bitmapb->bitmap);
+	//movemos el puntero del fichero a donde apunta el offset
+	unsigned long bitmap_offset = superblock->bitmapb_offset;
+	//	 lseek(file, bitmap_offset, SEEK_SET);
+	int size_bitmap = sizeof(bitmapb->bitmap);
 
-	 if(BLOCK_SIZE < size_bitmap){
-		 nBloquesReservados = size_bitmap/BLOCK_SIZE;
-		 if (!(size_bitmap % BLOCK_SIZE)) nBloquesReservados++;
-	 }
-	 /* tamaño de pagina (?) */
+	if(BLOCK_SIZE < size_bitmap){
+		nBloquesReservados = size_bitmap/BLOCK_SIZE;
+		if (!(size_bitmap % BLOCK_SIZE)) nBloquesReservados++;
+	}
+	/* tamaño de pagina (?) */
 
-//
-	 bitmapb = mmap(NULL,BLOCK_SIZE*nBloquesReservados,PROT_WRITE|PROT_READ, MAP_SHARED,file, superblock->bitmapb_offset);
-	 // close(file);
-	 // ... siguen existiendo los mapeos en memoria del fichero
+	//
+	bitmapb = mmap(NULL,BLOCK_SIZE*nBloquesReservados,PROT_WRITE|PROT_READ, MAP_SHARED,file, superblock->bitmapb_offset);
+	// close(file);
+	// ... siguen existiendo los mapeos en memoria del fichero
+
+
+	/*
+	typedef char[][BLOCKSIZE] block_t;   // Matriz de caracteres de tam BLOCKSIZE = bloques de datos
+
+	typedef {                            // Definimos tipo bitmap (para inodos y bloques)
+		char *array;                     // Array de bytes (?)
+		uint64_t size;                   // uint64_t = unsigned long long
+	} bitmap_t;
+
+	typedef {                            // Definimos tipo de datos para nuestro filesystem
+		struct superblock_t *sb;
+		struct bitmap_t blockBM;
+		struct bitmap_t inodeBM;
+		struct inode_t *inode;
+		struct block_t *block;
+	} filesystem_t;
+
+	filesystem_t myfilesystem;
+
+	myfilesystem.sb->numBLOCK = XXX
+
+	int fd = open(argv[1],O_RDWR);       // Abrimos fichero contenedor siendo este el 1º parámetro del comando
+	fstat(fd, &statbuff);                // Obtenemos datos del fichero
+
+	myfilesystem.inodeBM.array= (unsigned char*)mmap(....);
+	myfilesystem.inodeBM.size = ...; // numero de elementos / 8;
+	....
+	mmap
+	....
+	close(fd);
+	...
+
+	elem = getItem(myfilesystem.blockBM); // check -1
+	freeItem(&mybitmap, elem);
+
+	main_fuse(......., &myfilesystem);
+	*/
+	/*
+	dentro de fuse
+	struct filesystem_t *private "<- &myfilesystem"
+
+
+	private->inodeBM.array= (unsigned char*)mmap(....);
+	private->inodeBM.size = ...; // numero de elementos / 8;
+
+	write(..buf.offset..count.)
+	{
+		block_num = offset / BLOCKSIZE;
+		suboffset = offset % BLOCKSIZE;
+		myblocknumber = private->inode[ith].i_directos[block_num]; // ultimo
+		private->block[myblocknumber][suboffset] = buf; // memcpy(...)
+	}
+
+	elem = getItem(myfilesystem.blockBM); // check -1
+	freeItem(&mybitmap, elem);
+
+	int freeItem(bitmap_t *bitmap, long n)
+	{
+		uint64_t i = n/8; // n >> 3
+		unsigned char j = n%8; // n & 0x07
+		unsigned char mask = (0x01 << j);
+		if (! (bitmap->array[i] & mask)) {
+			// errno = EINVAL;
+			return -1;
+		}
+
+		bitmap->array[i] &= ~mask;
+		return 0;
+	}
+
+	int64_t getItem(bitmap_t *bitmap)
+	{
+		uint64_t i;
+		char *p;
+		for (i=0, p=bitmap->array; i<bitmap->size; i++, p++) {
+	   	   if (*p != 0xff) break;
+		}
+		if (i < bitmap->size) {
+			for (j = 0; j < 8; j++) {
+			// ...
+			}
+		} else {
+			errno = ENOSPC;
+			return -1;
+		}
+	}
+	*/
 	 
-	 
-	 /*
-	 typedef char[][BLOCKSIZE] block_t;
-	 
-	 typedef {
-	    char *array;
-	    uint64_t size;
-     } bitmap_t;
-     
-	 typedef {
-	    struct superblock_t *sb;
-	    struct bitmap_t blockBM;
-	    struct bitmap_t inodeBM;
-	    struct inode_t *inode;
-	    struct block_t *block;
-     } filesystem_t;
-     
-     filesystem_t myfilesystem;
-     
-     myfilesystem.sb->numBLOCK = XXX 
-     
-     int fd = open(argv[1],O_RDWR);
-     fstat(fd, &statbuff);
-          
-     myfilesystem.inodeBM.array= (unsigned char*)mmap(....);
-	 myfilesystem.inodeBM.size = ...; // numero de elementos / 8;
-	 ....
-	 mmap
-	 ....
-	 close(fd);
-	 ...
-	 
-	 elem = getItem(myfilesystem.blockBM); // check -1
-	 freeItem(&mybitmap, elem);
-     
-     main_fuse(......., &myfilesystem);
-     */  
-     /* 
-     dentro de fuse
-     struct filesystem_t *private "<- &myfilesystem"
-     
-     
-	 private->inodeBM.array= (unsigned char*)mmap(....);
-	 private->inodeBM.size = ...; // numero de elementos / 8;
-	 
-	 write(..buf.offset..count.)
-	 {
-	   block_num = offset / BLOCKSIZE;
-	   suboffset = offset % BLOCKSIZE;
-	   myblocknumber = private->inode[ith].i_directos[block_num]; // ultimo
-	   private->block[myblocknumber][suboffset] = buf; // memcpy(...)
-     }
-	 
-	 elem = getItem(myfilesystem.blockBM); // check -1
-	 freeItem(&mybitmap, elem);
-	 
-	 int freeItem(bitmap_t *bitmap, long n)
-	 {
-	    uint64_t i = n/8; // n >> 3
-	    unsigned char j = n%8; // n & 0x07
-	    unsigned char mask = (0x01 << j);
-	    if (! (bitmap->array[i] & mask)) {
-	       // errno = EINVAL;
-	       return -1;
-	    }
-	    bitmap->array[i] &= ~mask;
-	    return 0;
-     }
-     int64_t getItem(bitmap_t *bitmap)
-     {
-        uint64_t i;
-        char *p;
-        for (i=0, p=bitmap->array; i<bitmap->size; i++, p++) {
-           if (*p != 0xff) break;
-	    }
-	    if (i < bitmap->size) {
-	        for (j = 0; j < 8; j++) {
-	            
-		    }
-	    } else {
-	        errno = ENOSPC;
-	        return -1;
-	    }
-     }
-	 */
-	 
-	 printf("%d\n", sizeof(bitmapb->bitmap));
+	printf("%d\n", sizeof(bitmapb->bitmap));
 
-	 superblock->bitmapi_offset = BLOCK_SIZE*nBloquesReservados + superblock->bitmapb_offset;
+	superblock->bitmapi_offset = BLOCK_SIZE*nBloquesReservados + superblock->bitmapb_offset;
 
-	 off_t bitmapi_offset = superblock->bitmapi_offset;
-	 lseek(file, bitmapi_offset, SEEK_SET);
+	off_t bitmapi_offset = superblock->bitmapi_offset;
+	lseek(file, bitmapi_offset, SEEK_SET);
 
-	 if(BLOCK_SIZE < sizeof(bitmapi->bitmap)){
-	 		 nBloquesReservados = sizeof(bitmapi->bitmap)/BLOCK_SIZE;
-	 }
+	if(BLOCK_SIZE < sizeof(bitmapi->bitmap)){
+		 nBloquesReservados = sizeof(bitmapi->bitmap)/BLOCK_SIZE;
+	}
 
-	 bitmapi = mmap(NULL,BLOCK_SIZE*nBloquesReservados,PROT_WRITE|PROT_READ, MAP_SHARED,file, superblock->bitmapi_offset);
-	 printf("%d\n", sizeof(bitmapi->bitmap));
+	bitmapi = mmap(NULL,BLOCK_SIZE*nBloquesReservados,PROT_WRITE|PROT_READ, MAP_SHARED,file, superblock->bitmapi_offset);
+	printf("%d\n", sizeof(bitmapi->bitmap));
 
 	printf("Todo guardado\n");
 	//msync(superblock, BLOCK_SIZE, MS_SYNC);
