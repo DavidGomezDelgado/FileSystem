@@ -92,17 +92,22 @@ void rename_file(char *name, char *new_name, struct inode_fs *directory, struct 
 
 	while (i < N_DIRECTOS && (directory -> i_directos[i] != -1) && !encontrado) {
 		// Recorremos el bloque (32 entradas) de cada puntero directo del inodo
-		memcpy(entry, bitmapb -> map[directory -> i_directos[i] + offset], sizeof(struct directory_entry));
+		memcpy(entry, bitmapb -> map[directory -> i_directos[i]] + offset, sizeof(struct directory_entry));
 
-		for (int j = 0; j < 32 && (entry -> inode != NULL) && !encontrado; j++) {
+		for (int j = 1; j < 32 && (entry -> inode != NULL) && !encontrado; j++) {
 			if (strcmp(entry -> name, name) == 0) {
 				// Hemos encontrado la entrada, cambiamos su nombre
 				strcpy(entry -> name, new_name);
+				memcpy(bitmapb -> map[directory -> i_directos[i]] + offset, entry, sizeof(struct directory_entry));
 				encontrado = 1;
+			} else {
+				offset = sizeof(struct directory_entry) * j;
+				memcpy(entry, bitmapb -> map[directory -> i_directos[i]] + offset, sizeof(struct directory_entry));
 			}
 
 			// MEJORA: en vez de cambiar el nombre a la entrada, eliminarla (setear a 0) y añadir nueva con new_name al mismo inodo
 		}
+		i++;
 	}
 
 	free(entry);
