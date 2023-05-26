@@ -23,6 +23,7 @@
 - Deberíamos hacer "mini funciones" para compactar el código (SI HAY TIEMPO).
 
 *** ANOTACIONES ***
+- El filesystem.h final es el de la carpeta mkFileSystem.
 - Tener cuidado a la hora de manejar bitmap_bloques->bitmap. Manejamos bits, no bytes.
 
 *** DUDAS ***
