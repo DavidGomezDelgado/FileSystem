@@ -28,3 +28,4 @@
 *** DUDAS ***
 - Función modificar tamaño de fichero.
 - ¿Hacemos malloc para myfilesystem?
+- ¿Cuánto espacio mapeamos para almacenar todos los bloques?
