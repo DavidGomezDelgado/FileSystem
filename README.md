@@ -18,14 +18,13 @@
 
 *** TODO ***
 - Modificar manejo de los bitmaps -> no accedemos a través de memoria, sino a través del fichero
-- Continuar con _inode_search().
-- Gestionar ficheros y directorios a partir de un path distinto al actual.
+- ¿Continuar con _inode_search()?
+- Gestionar ficheros y directorios a partir de un path distinto al actual (SI HAY TIEMPO).
 - Deberíamos hacer "mini funciones" para compactar el código (SI HAY TIEMPO).
 
 *** ANOTACIONES ***
-- El filesystem.h final es el de la carpeta mkFileSystem.
 - Tener cuidado a la hora de manejar bitmap_bloques->bitmap. Manejamos bits, no bytes.
 
 *** DUDAS ***
-- Bloques reales negativos.
 - Función modificar tamaño de fichero.
+- ¿Hacemos malloc para myfilesystem?
