@@ -29,3 +29,6 @@
 - Función modificar tamaño de fichero.
 - ¿Hacemos malloc para myfilesystem?
 - ¿Cuánto espacio mapeamos para almacenar todos los bloques?
+- ¿Un bloque de entradas tiene 128 entradas?
+- ¿Distintos punteros pueden acceder al mismo bloque? -> Ya que un bloque de entradas suponemos tiene 128 entradas
+- ¿Seteamos a 1 el índice de un bloque cuando ya no tiene entradas libres o c?
