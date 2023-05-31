@@ -24,6 +24,7 @@
 
 *** ANOTACIONES ***
 - Tener cuidado a la hora de manejar bitmap_bloques->bitmap. Manejamos bits, no bytes.
+- En nuestro filesystem perdemos como mucho 7 bloques.
 
 *** DUDAS ***
 - Función modificar tamaño de fichero.
