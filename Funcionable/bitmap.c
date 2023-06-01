@@ -5,7 +5,7 @@
 //#include <errno.h>
 #include "filesystem.h"
 
-
+/* Ontención del primer índice libre */
 unsigned long free_bit(struct bitmap_t *bitmap){
 	int byte = 0;
 	unsigned long index;

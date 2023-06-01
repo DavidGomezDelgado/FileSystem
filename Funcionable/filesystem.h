@@ -18,28 +18,26 @@ struct directory_entry{
 	struct inode_fs *inode;
 };
 
-
-
 struct inode_fs{
 	int i_num;
 	char i_type;
 	int i_tam;
 	int i_permisos;
 	int i_links;
-	int i_directos[N_DIRECTOS]; //320 direcciones (32 bloques cada puntero)
+	int i_directos[N_DIRECTOS]; //1280 direcciones (128 bloques cada puntero)
 	//offset en el fichero?
 	char relleno[8]; //Bytes de relleno para tener un múltiplo del tamaño del bloque
 };
 
 
-//estructura que reutilizamos para bitmapb y bitmapi
+// Estructura que reutilizamos para bitmapb y bitmapi
 struct bitmap_t{
 	unsigned char *array;
 	uint64_t size;
 };
 
-//structura bloque de datos
-//bloque con datos
+// Estructura bloque de datos
+// bloque con datos
 typedef uint8_t block_t[BLOCK_SIZE];
 
 struct superblock_fs {
@@ -62,11 +60,9 @@ typedef struct {
 	struct bitmap_t inode_bitmap;
 	struct bitmap_t block_bitmap;
 	struct inode_fs *inode;
-	//array incompleto que nos dice en cuál bloque de datos estamos
-	block_t *block;
+	block_t *block;   //array incompleto que nos dice en cuál bloque de datos estamos
 	int fd;
 } filesystem_t;
-
 
 
 /***************************************************************
@@ -75,11 +71,27 @@ typedef struct {
  
  //bitmap.c
 unsigned long free_bit(struct bitmap_t *);
-
  
  //create_inode.c
-void create_inode(char , filesystem_t *);
-void create_root(filesystem_t *);
+struct inode_fs *create_inode(char, filesystem_t *);
+struct inode_fs *create_root(filesystem_t *);
+
+// tree_manager.c
+struct inode_fs *existe_inode(char *, struct directory_entry *);
+struct inode_fs *inode_search (char *, struct inode_fs *, filesystem_t *);
+
+// file_manager.c
+void update_entry (char *, struct inode_fs *, struct inode_fs *, filesystem_t *);
+void touch (char *, char , char *, struct inode_fs *, filesystem_t *);
+// void clean_inode (struct inode_fs *, filesystem_t *);
+
+// file_remove.c
+
+// file_operations.c
+
+// directory_operations.c
+void read_directory(char *, struct inode_fs *, filesystem_t *);
+
 //
 // //file_manager.c
 // void touch (char *, char, char *, struct inode_fs *, struct inode_bitmap_fs *, struct block_bitmap_fs *);
@@ -96,8 +108,6 @@ void create_root(filesystem_t *);
 // //file_operations.c
 // void file_edit(char *, char *, struct inode_fs *, struct block_bitmap_fs *);
 // char *read_file(char *,struct inode_fs *, struct block_bitmap_fs *);
-//
-//
 //
 // //directory_operations.c
 // char *read_directory(char *,struct inode_fs *, struct block_bitmap_fs *);

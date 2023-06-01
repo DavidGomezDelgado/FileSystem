@@ -69,11 +69,30 @@ struct superblock_fs {
  * 							FUNCTIONS						   *
  ***************************************************************/
  
- //bitmap.c
+// bitmap.c
 unsigned long free_bit(struct bitmap_t *);
 
+// create_inode.c
+
+
+// tree_manager.c
+struct inode_fs *existe_inode(char *, struct directory_entry *);
+struct inode_fs *inode_search (char *, struct inode_fs *, filesystem_t *);
+
+// file_manager.c
+
+
+// file_remove.c
+
+
+// file_operations.c
+
+
+// directory_operations.c
+
+
  
- //create_inode.c
+//create_inode.c
 // struct inode_fs *create_inode(char, char*, struct inode_bitmap_fs *, struct block_bitmap_fs *);
 // struct inode_fs *create_root(struct inode_bitmap_fs *, struct block_bitmap_fs *);
 //

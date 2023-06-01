@@ -107,7 +107,7 @@ int main(int argc, char *argv[]){
 			 i++;
 		 }
 
-		 create_root(private_data);
+		 struct inode_fs *root = create_root(private_data);
 	//**FIN DE PRUEBAS**//
 
 
@@ -142,6 +142,62 @@ int main(int argc, char *argv[]){
 	for(i = 0; i < 2; i++){
 		printf("%s %d\n", aux2[i].name, aux2[i].inode->i_num);
 	}
+
+	create_inode('f', private_data);
+	create_inode('f', private_data);
+
+	for (i = 0; i < 10; i++) {
+		printf("Byte %ld: %#x\n", i, private_data->inode_bitmap.array[i]);
+	}
+
+	// ¡¡SE CREAN BIEN LOS INODOS!!
+	printf("Mostramos id de inodos: \n");
+	for (i = 0; i < 10; i++) {
+		printf("id: %d\n", private_data->inode[i].i_num);
+	}
+
+	touch("fichero1", 'f', "/" , root, private_data);
+	touch("fichero2", 'f', "/" , root, private_data);
+	touch("directorio1", 'd', "/" , root, private_data);
+
+	// Buscamos inodo de directorio1
+	struct inode_fs *dir1 = inode_search("directorio1", root, private_data);
+
+	touch("fichero3", 'f', "directorio1" , dir1, private_data);
+	touch("fichero4", 'f', "directorio1" , dir1, private_data);
+	touch("fichero5", 'f', "directorio1" , dir1, private_data);
+	touch("fichero6", 'f', "directorio1" , dir1, private_data);
+
+	// probamos para un fichero existente
+	touch("fichero5", 'f', "directorio1" , dir1, private_data);
+
+	printf("Mostramos bitmap de inodos\n");
+	for (i = 0; i < 10; i++) {
+		printf("Byte %ld: %#x\n", i, private_data->inode_bitmap.array[i]);
+	}
+/*
+	printf("Mostramos contenido de /: \n");
+	aux2 = (struct directory_entry *) private_data->block[root->i_directos[0] - private_data->superblock->reserved_block];
+	i = 0;
+	while (i < 10 && aux2[i].inode != NULL) {
+		printf(" nombre: %s id: %d\n", aux2[i].name, aux2[i].inode->i_num);
+		i++;
+	}
+*/
+
+	read_directory("/", root, private_data);
+
+	fflush(stdout);
+/*
+	printf("Mostramos contenido de directorio1: \n");
+	aux2 = (struct directory_entry *) private_data->block[dir1->i_directos[0] - private_data->superblock->reserved_block];
+	i = 0;
+	while (i < 10 && aux2[i].inode != NULL) {
+		printf(" nombre: %s id: %d\n", aux2[i].name, aux2[i].inode->i_num);
+		i++;
+	}
+*/
+	read_directory("directorio1", dir1, private_data);
 
 	fflush(stdout);
 	close(file);
