@@ -31,7 +31,7 @@ void update_entry (char *name, struct inode_fs *hijo, struct inode_fs *padre, fi
 }
 
 /* Creamos fichero en directorio "directory" con inodo "i_directory" */
-void touch (char *name, char type, char *directory, struct inode_fs *i_directory, filesystem_t *private_data) {
+void touch (char *name, char *directory, struct inode_fs *i_directory, filesystem_t *private_data) {
 
 	struct inode_fs *existente;
 	struct inode_fs *inode;
@@ -47,7 +47,7 @@ void touch (char *name, char type, char *directory, struct inode_fs *i_directory
 
 		// Si no existe el inodo, lo creamos
 		if (existente == NULL) {
-			inode = create_inode(type, private_data);
+			inode = create_inode('f', private_data);
 
 			// Añadimos la nueva entrada al padre
 			update_entry(name, inode, i_directory, private_data);
@@ -56,17 +56,6 @@ void touch (char *name, char type, char *directory, struct inode_fs *i_directory
 			inode->i_links++;
 			i_directory->i_links++;
 
-			if (type == 'd') {
-				// Modificamos entrada .. para que apunte a su padre
-				entry = (struct directory_entry *) private_data->block[inode->i_directos[0] - private_data->superblock->reserved_block];
-				for (i = 0; i < 128 && (entry[i].inode != NULL) && !encontrado; i++) {
-					if (strcmp(entry[i].name, "..") == 0) {
-						entry[i].inode = i_directory;
-						encontrado = 1;
-					}
-				}
-			}
-
 		} else {
 			printf("Ya existe el fichero o directorio\n");
 		}
@@ -74,9 +63,56 @@ void touch (char *name, char type, char *directory, struct inode_fs *i_directory
 	}
 }
 
-/* Limpia un inodo */
-void clean_inode(struct inode_fs *inodo, filesystem_t *private_data){
+void rename_file (char *name, char *new_name, struct inode_fs *directory, struct inode_fs *dir_destino, filesystem_t *private_data) {
 
+	struct inode_fs *inodo = inode_search(name, directory, private_data);
+	struct directory_entry *entry;
+	int i, j, encontrado = 0;
+
+	if (inodo != NULL) {
+
+		// Comprobamos si queremos renombrar o mover
+		if (new_name != NULL) {
+			// Queremos renombrar
+			for (i = 0; i < N_DIRECTOS && (directory->i_directos[i] != 0) && !encontrado; i++) {
+				entry = (struct directory_entry *) private_data->block[directory->i_directos[i] - private_data->superblock->reserved_block];
+
+				for (j = 0; j < max_entries && (entry[j].inode != NULL) && !encontrado; j++) {
+					// Comprobamos el nombre
+					if (strcmp(entry[j].name, name)) {
+						strcpy(entry[j].name, new_name);
+						encontrado = 1;
+					}
+				}
+			}
+
+		}
+
+		// --- POR AQUÍ ---
+
+		if (dir_destino != NULL) {
+			// Queremos mover
+		}
+
+	}
+
+}
+
+/* Limpia un inodo */
+void clean_inode (struct inode_fs *inodo, filesystem_t *private_data) {
+
+	int byte, bit, i;
+
+	// Recorremos los punteros directos
+	for (i = 0; i < N_DIRECTOS && inodo->i_directos[i] != 0; i++) {
+		// Seteamos a NULL el bloque
+		byte = inodo->i_directos[i] / 8;
+		bit = 7 - (inodo->i_directos[i] % 8);
+		private_data->block_bitmap.array[byte] = private_data->block_bitmap.array[byte] & ~ (1 << bit);
+		memset(private_data->block[inodo->i_directos[i] - private_data->superblock->reserved_block], '\0', BLOCK_SIZE);
+		// Ahora no apunta a nada
+		inodo->i_directos[i] = 0;
+	}
 
 }
 
@@ -181,6 +217,47 @@ void clean_inode(struct inode_fs *inodo, struct block_bitmap_fs *bitmapb){
 			bitmapb->map[inodo->i_directos[i]] = 0;
 			inodo->i_directos[i] = -1;
 	}
+}
+
+// Renombramos un fichero (o directorio) a partir de su nombre (name) en su directorio (directory)
+// Sólo cambiamos el nombre del registro de directorio (NO BORRAMOS ENTRY Y CREAMOS NUEVA, QUE SERÍA LO SUYO)
+
+void rename_file(char *name, char *new_name, struct inode_fs *directory, struct block_bitmap_fs* bitmapb) {
+	// Comprobamos si existe el fichero o directorio
+	int i = 0;
+	int encontrado = 0;
+	int offset = 0;   // offset para desplazarnos por los bloques
+	struct inode_fs *inodo = inode_search(name, directory, bitmapb);
+
+	if (inodo == NULL) {
+		printf("No existe el fichero\n");
+		return;
+	}
+
+	// Buscamos la entrada de directorio
+	struct directory_entry *entry = malloc(sizeof(struct directory_entry));
+
+	while (i < N_DIRECTOS && (directory -> i_directos[i] != -1) && !encontrado) {
+		// Recorremos el bloque (32 entradas) de cada puntero directo del inodo
+		memcpy(entry, bitmapb -> map[directory -> i_directos[i]] + offset, sizeof(struct directory_entry));
+
+		for (int j = 1; j < 32 && (entry -> inode != NULL) && !encontrado; j++) {
+			if (strcmp(entry -> name, name) == 0) {
+				// Hemos encontrado la entrada, cambiamos su nombre
+				strcpy(entry -> name, new_name);
+				memcpy(bitmapb -> map[directory -> i_directos[i]] + offset, entry, sizeof(struct directory_entry));
+				encontrado = 1;
+			} else {
+				offset = sizeof(struct directory_entry) * j;
+				memcpy(entry, bitmapb -> map[directory -> i_directos[i]] + offset, sizeof(struct directory_entry));
+			}
+
+			// MEJORA: en vez de cambiar el nombre a la entrada, eliminarla (setear a 0) y añadir nueva con new_name al mismo inodo
+		}
+		i++;
+	}
+
+	free(entry);
 }
 
 */

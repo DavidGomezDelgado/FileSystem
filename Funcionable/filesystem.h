@@ -12,6 +12,8 @@
 #define BLOCK_SIZE 4096
 #define MAGIC_N 123456
 
+#define max_entries (BLOCK_SIZE / sizeof(struct directory_entry *))
+
 
 struct directory_entry{
 	char name[28];
@@ -80,14 +82,25 @@ struct inode_fs *create_root(filesystem_t *);
 struct inode_fs *existe_inode(char *, struct directory_entry *);
 struct inode_fs *inode_search (char *, struct inode_fs *, filesystem_t *);
 
+// directory_manager.c
+void make_dir (char *, char *, struct inode_fs *, filesystem_t *);
+// void rm_dir (char *, struct inode_fs *, filesystem_t *);
+
 // file_manager.c
 void update_entry (char *, struct inode_fs *, struct inode_fs *, filesystem_t *);
-void touch (char *, char , char *, struct inode_fs *, filesystem_t *);
-// void clean_inode (struct inode_fs *, filesystem_t *);
+void touch (char *, char *, struct inode_fs *, filesystem_t *);
+void clean_inode (struct inode_fs *, filesystem_t *);
+// void rename_file(char *, char *, struct inode_fs *, struct block_bitmap_fs* );
 
 // file_remove.c
+struct directory_entry *search_last_entry (struct inode_fs *, filesystem_t *);  // CAUTION !!!
+void remove_dentry (char *, struct inode_fs *, filesystem_t *);
+void remove_inode (struct inode_fs *, filesystem_t *);
+void rm (char *, struct inode_fs *, filesystem_t *);
 
 // file_operations.c
+// void file_edit(char *, char *, struct inode_fs *, struct block_bitmap_fs *);
+// char *read_file(char *,struct inode_fs *, struct block_bitmap_fs *);
 
 // directory_operations.c
 void read_directory(char *, struct inode_fs *, filesystem_t *);
@@ -97,6 +110,7 @@ void read_directory(char *, struct inode_fs *, filesystem_t *);
 // void touch (char *, char, char *, struct inode_fs *, struct inode_bitmap_fs *, struct block_bitmap_fs *);
 // void print_directory(struct inode_fs);
 // void clean_inode(struct inode_fs *, struct block_bitmap_fs *);
+// void rename_file(char *, char *, struct inode_fs *, struct block_bitmap_fs* );
 //
 // //tree_manager.c
 // struct inode_fs *inode_search(char *, struct inode_fs *, struct block_bitmap_fs *);

@@ -5,6 +5,8 @@
 //#include <errno.h>
 #include "filesystem.h"
 
+// FUNCIÓN PARA SETEAR A 0 UN BIT
+
 /* Ontención del primer índice libre */
 unsigned long free_bit(struct bitmap_t *bitmap){
 	int byte = 0;

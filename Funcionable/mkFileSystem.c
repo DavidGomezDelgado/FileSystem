@@ -156,20 +156,20 @@ int main(int argc, char *argv[]){
 		printf("id: %d\n", private_data->inode[i].i_num);
 	}
 
-	touch("fichero1", 'f', "/" , root, private_data);
-	touch("fichero2", 'f', "/" , root, private_data);
-	touch("directorio1", 'd', "/" , root, private_data);
+	touch("fichero1", "/" , root, private_data);
+	touch("fichero2", "/" , root, private_data);
+	make_dir("directorio1", "/" , root, private_data);
 
 	// Buscamos inodo de directorio1
 	struct inode_fs *dir1 = inode_search("directorio1", root, private_data);
 
-	touch("fichero3", 'f', "directorio1" , dir1, private_data);
-	touch("fichero4", 'f', "directorio1" , dir1, private_data);
-	touch("fichero5", 'f', "directorio1" , dir1, private_data);
-	touch("fichero6", 'f', "directorio1" , dir1, private_data);
+	touch("fichero3", "directorio1" , dir1, private_data);
+	touch("fichero4", "directorio1" , dir1, private_data);
+	touch("fichero5", "directorio1" , dir1, private_data);
+	touch("fichero6", "directorio1" , dir1, private_data);
 
 	// probamos para un fichero existente
-	touch("fichero5", 'f', "directorio1" , dir1, private_data);
+	touch("fichero5", "directorio1" , dir1, private_data);
 
 	printf("Mostramos bitmap de inodos\n");
 	for (i = 0; i < 10; i++) {
@@ -198,6 +198,11 @@ int main(int argc, char *argv[]){
 	}
 */
 	read_directory("directorio1", dir1, private_data);
+
+	fflush(stdout);
+
+	rm("fichero1", root, private_data);
+	read_directory("/", root, private_data);
 
 	fflush(stdout);
 	close(file);

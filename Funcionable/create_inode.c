@@ -17,10 +17,10 @@ struct inode_fs *create_inode (char type, filesystem_t *private_data) {
 	// Inicializamos atributos
 	private_data->inode[numi].i_num = numi;
 	private_data->inode[numi].i_type = type;
-	private_data->inode[numi].i_permisos = 666;
 
 	if (type == 'd') {
 
+		private_data->inode[numi].i_permisos = 777;
 		private_data->inode[numi].i_links = 2;
 		private_data->inode[numi].i_tam = sizeof(struct directory_entry) * 2;
 		private_data->inode[numi].i_directos[0] = free_bit(&((private_data)->block_bitmap));
@@ -38,6 +38,7 @@ struct inode_fs *create_inode (char type, filesystem_t *private_data) {
 
 	} else if (type == 'f') {
 
+		private_data->inode[numi].i_permisos = 666;
 		private_data->inode[numi].i_links = 1;
 		private_data->inode[numi].i_tam = 0;
 
@@ -55,7 +56,7 @@ struct inode_fs *create_root (filesystem_t *private_data) {
 	private_data->inode[numinode].i_num = numinode;
 	private_data->inode[numinode].i_type = 'd';
 	private_data->inode[numinode].i_tam = sizeof(struct directory_entry) * 2;
-	private_data->inode[numinode].i_permisos = 666;
+	private_data->inode[numinode].i_permisos = 777;
 	private_data->inode[numinode].i_links = 2;
 	memset(private_data->inode[numinode].i_directos, 0, sizeof(int)*N_DIRECTOS);
 	//memcpy(inodo -> i_simple_ind, indirecto_simple, sizeof(int)*N_SIMPLES);
