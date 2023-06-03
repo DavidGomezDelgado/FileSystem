@@ -4,13 +4,15 @@
 #include <string.h>
 #include "filesystem.h"
 
+/* Eliminación de inodo tanto en inode_bitmap como el array de inodos */
 void remove_inode (struct inode_fs *inode, filesystem_t *private_data) {
 
 	int byte = inode->i_num / 8;  // Obtenemos byte del bitmap
 	int bit = 7 - (inode->i_num % 8);
 	private_data->inode_bitmap.array[byte] = private_data->inode_bitmap.array[byte] &~ (1 << bit);
 
-	inode = NULL;
+	//inode = NULL;
+	memset(&private_data->inode[inode->i_num], 0, sizeof(struct inode_fs));
 
 }
 
@@ -20,32 +22,38 @@ struct directory_entry *search_last_entry (struct inode_fs *i_directorio, filesy
 	struct directory_entry *entry;
 
 	// Recorremos punteros directos menos el último
-	for (i = 0; i < N_DIRECTOS - 1 && (i_directorio->i_directos[i] != 0); i++) {
+	for (i = 0; i < N_DIRECTOS && (i_directorio->i_directos[i] != 0); i++) {
 		// Obtenemos entradas
 		entry = (struct directory_entry *) private_data->block[i_directorio->i_directos[i] - private_data->superblock->reserved_block];
 
 		// Recorremos las entradas
 		for (j = 0; j < max_entries && (entry[j].inode != NULL); j++) {
+			printf("search_last_entry -> entrada %d: %s  entrada %d: %s\n", j, entry[j].name, j+1, entry[j+1].name);
+
 			// Comprobamos la siguiente entrada
 			if (entry[j+1].inode == NULL) {
-				// Hemos llegado a la última y la seteamos a NULL
-				strcpy(entry[j].name, "");
-				entry[j].inode = NULL;
+				// Hemos llegado a la última
+//				strcpy(entry[j].name, "");
+//				entry[j].inode = NULL;
+
+				// Si esta entrada es la 1ª de un bloque seteamos a 0 en block_bitmap
+				if (j == 0) {
+					byte = i_directorio->i_directos[i] / 8;
+					bit = 7 - (i_directorio->i_directos[i] % 8);
+					private_data->block_bitmap.array[byte] = private_data->block_bitmap.array[byte] & ~(1 << bit);
+
+				}
+				printf("search_last_entry -> entrada %d: %s\n", j, entry[j].name);
+				return &entry[j];
+
 			}
 
-			// Si esta entrada es la 1ª de un bloque "liberamos" el bloque
-			if (j == 0) {
-				byte = i_directorio->i_directos[i] / 8;
-				bit = 7 - (i_directorio->i_directos[i] % 8);
-				private_data->block_bitmap.array[byte] = private_data->block_bitmap.array[byte] & ~(1 << bit);
-
-			}
 		}
 	}
 
 	// CAUTION !! POSIBLE FALLO DE ÚLIMO PUNTERO DIRECTO
 
-	return entry;
+	return &entry[j];
 
 }
 
@@ -58,17 +66,25 @@ void remove_dentry (char *nombre, struct inode_fs *i_directorio, filesystem_t *p
 
 	// Recorremos punteros directos del inodo padre
 	for (i = 0; i < N_DIRECTOS && (i_directorio->i_directos[i] != 0) && !encontrado; i++) {
-		// Obtenemos entrada
+
+		// Obtenemos entradas
 		entry = (struct directory_entry *) private_data->block[i_directorio->i_directos[i] - private_data->superblock->reserved_block];
 
-		// Recorremos las entradas
+		// Recorremos las entradas buscando la que queremos eliminar
 		for (j = 0; j < max_entries && (entry[j].inode != NULL) && !encontrado; j++) {
+			printf("remove_dentry -> entrada: %s\n", entry[j].name);
+
 			if (strcmp(entry[j].name, nombre) == 0) {
+				// Obtenemos la última entrada para moverla a la que queremos eliminar
 				last = search_last_entry(i_directorio, private_data);
 
-				if (strcmp(entry[j].name, last->name)) {
-					// Copiamos última entrada en la borrada
+				if (strcmp(entry[j].name, last->name) != 0) {
+					printf("remove_dentry -> entrada a borrar: %s  entrada last: %s\n", entry[j].name, last->name);
+
+					// Copiamos última entrada en la borrada y liberamos last
 					memcpy(&entry[j] ,last, sizeof(struct directory_entry));
+					memset(last, 0, sizeof(struct directory_entry));
+
 				}
 
 				encontrado = 1;
@@ -94,6 +110,8 @@ void rm (char *nombre, struct inode_fs *current_directory, filesystem_t *private
 		// Eliminaos el inodo correspondiente
 		clean_inode(inode, private_data);
 		remove_inode(inode,  private_data);
+
+
 	}
 
 }

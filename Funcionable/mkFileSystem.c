@@ -204,6 +204,12 @@ int main(int argc, char *argv[]){
 	rm("fichero1", root, private_data);
 	read_directory("/", root, private_data);
 
+	printf("Compruebo si se guardan bien los inodos en private_data:\n");
+	for(i = 0; i < 20; i++) {
+		printf("id: %d ", private_data->inode[i].i_num);
+	}
+	printf("Se guardan bien :D\n");
+
 	fflush(stdout);
 	close(file);
 	//HASTA AQUÍ//
