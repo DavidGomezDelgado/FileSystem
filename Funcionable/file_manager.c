@@ -31,20 +31,23 @@ void update_entry (char *name, struct inode_fs *hijo, struct inode_fs *padre, fi
 }
 
 /* Creamos fichero en directorio "directory" con inodo "i_directory" */
-void touch (char *name, char *directory, struct inode_fs *i_directory, filesystem_t *private_data) {
+void touch (char *name, char *path, filesystem_t *private_data) {
 
+	struct inode_fs *i_directory;
 	struct inode_fs *existente;
 	struct inode_fs *inode;
-	struct directory_entry *entry;
-	int i, encontrado = 0;
+	//struct directory_entry *entry;
 
 	if (strncmp(name, ".", 1) == 0){
 		printf("El nombre no puede empezar por .\n");
 	} else {
-
+		if(strcmp(path, "/") == 0){
+			i_directory = &(private_data->inode[0]);
+		}else{
+			i_directory = inode_search_path(path, private_data);
+		}
+			existente = inode_search(name, i_directory, private_data);
 		// Comprobamos si ya existe el inodo en el directorio
-		existente = inode_search(name, i_directory, private_data);
-
 		// Si no existe el inodo, lo creamos
 		if (existente == NULL) {
 			inode = create_inode('f', private_data);
@@ -261,7 +264,6 @@ void rename_file(char *name, char *new_name, struct inode_fs *directory, struct 
 }
 
 */
-
 
 
 

@@ -267,4 +267,3 @@ void rm (char *nombre, struct inode_fs *current_directory, struct inode_bitmap_f
 */
 
 
-

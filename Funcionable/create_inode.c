@@ -74,4 +74,3 @@ struct inode_fs *create_root (filesystem_t *private_data) {
 
 	return &private_data->inode[numinode];
 }
-

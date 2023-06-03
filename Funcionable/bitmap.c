@@ -35,4 +35,3 @@ unsigned long free_bit(struct bitmap_t *bitmap){
 
 	return index;
 }
-

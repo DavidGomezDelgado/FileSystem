@@ -42,6 +42,26 @@ struct inode_fs *inode_search (char *name, struct inode_fs *directory, filesyste
 
 }
 
+struct inode_fs *inode_search_path(char *path, filesystem_t *private_data){
+	char* nombre_dir;
+	char *camino = (char*) malloc(sizeof(path) + 1);
+	if(path == NULL){
+		printf("No ha introducido ningún path");
+		return NULL;
+	}
+	strcpy(camino, path);
+	//char *delimitador = "/";
+	struct inode_fs *inodo = &(private_data -> inode[0]);
+	nombre_dir = strtok(camino, "/");
+	if(nombre_dir != NULL){
+		while(nombre_dir != NULL && inodo != NULL){
+			inodo = inode_search(nombre_dir, &(private_data->inode[inodo->i_num]), private_data);
+			nombre_dir = strtok(NULL, "/");
+		}
+	}
+	free(camino);
+	return inodo;
+}
 
 /*
 
@@ -64,10 +84,10 @@ struct inode_fs *inode_search(char *name, struct inode_fs *directory, struct blo
 	struct directory_entry *entry = malloc(sizeof(struct directory_entry));
 	struct directory_entry *aux = malloc(sizeof(struct directory_entry));
 	struct directory_entry *aux2 = malloc(sizeof(struct directory_entry));
-	//Comenzamos desde el directorio actual (directory) 
-	
+	//Comenzamos desde el directorio actual (directory)
+
 	//Miramos sus punteros directos y buscamos de manera recursiva
-	
+
 	//Estamos preguntando por si mismo?
 	memcpy(aux, bitmapb->map[directory->i_directos[0]]+sizeof(struct directory_entry), sizeof(struct directory_entry));
 	if(aux->inode->i_directos[0] != -1){
@@ -175,5 +195,5 @@ struct inode_fs *_inode_search(char *name, char *path, struct inode_fs current_d
 		}else{
 			aux[n_aux] = name[i];
 			n_aux++;
-		}	
+		}
 	}*/

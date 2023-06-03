@@ -62,4 +62,3 @@ char *read_directory(char *nombre,struct inode_fs *directory, struct block_bitma
 	return NULL;
 }
 */
-

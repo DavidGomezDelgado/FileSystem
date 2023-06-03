@@ -76,7 +76,7 @@ int main(int argc, char *argv[]){
 	 private_data->inode_bitmap.size = numi;
 
 
-	 private_data->inode = (struct inode_fs*) mmap(NULL,private_data->superblock->bitmapi_offset - private_data->superblock->bitmapb_offset, PROT_WRITE|PROT_READ, MAP_SHARED,file, private_data->superblock->offset_inodos); // @suppress("Field cannot be resolved")
+ 	 private_data->inode = (struct inode_fs*) mmap(NULL,private_data->superblock->bitmapi_offset - private_data->superblock->bitmapb_offset, PROT_WRITE|PROT_READ, MAP_SHARED,file, private_data->superblock->offset_inodos); // @suppress("Field cannot be resolved")
 	 private_data->block = (block_t*) mmap(NULL,statbuf.st_size-private_data->superblock->offset_bloques, PROT_WRITE|PROT_READ, MAP_SHARED,file, private_data->superblock->offset_bloques);
 
 	printf("Todo guardado\n");
@@ -156,20 +156,20 @@ int main(int argc, char *argv[]){
 		printf("id: %d\n", private_data->inode[i].i_num);
 	}
 
-	touch("fichero1", "/" , root, private_data);
-	touch("fichero2", "/" , root, private_data);
-	make_dir("directorio1", "/" , root, private_data);
+	touch("fichero1", "/" , private_data);
+	touch("fichero2", "/" , private_data);
+	make_dir("directorio1", "/", private_data);
 
 	// Buscamos inodo de directorio1
-	struct inode_fs *dir1 = inode_search("directorio1", root, private_data);
+	struct inode_fs *dir1 = inode_search_path("/directorio1", private_data);
 
-	touch("fichero3", "directorio1" , dir1, private_data);
-	touch("fichero4", "directorio1" , dir1, private_data);
-	touch("fichero5", "directorio1" , dir1, private_data);
-	touch("fichero6", "directorio1" , dir1, private_data);
+	touch("fichero3", "/directorio1", private_data);
+	touch("fichero4", "/directorio1", private_data);
+	touch("fichero5", "/directorio1", private_data);
+	touch("fichero6", "/directorio1", private_data);
 
 	// probamos para un fichero existente
-	touch("fichero5", "directorio1" , dir1, private_data);
+	touch("fichero5", "/directorio1/", private_data);
 
 	printf("Mostramos bitmap de inodos\n");
 	for (i = 0; i < 10; i++) {
@@ -210,6 +210,20 @@ int main(int argc, char *argv[]){
 	}
 	printf("Se guardan bien :D\n");
 
+	file_edit("Hola", "fichero2", root, private_data);
+	char *cadena = read_file("fichero2", root, private_data);
+	printf("La cadena es:\n%s\n",cadena);
+	file_edit(":)", "fichero2", root, private_data);
+	char *cadena2 = read_file("fichero2", root, private_data);
+	printf("La cadena es:\n%s\n",cadena2);
+
+	make_dir("directorio2", "/", private_data);
+	struct inode_fs *inodo_aux = inode_search_path("/directorio2", private_data);
+	if(inodo_aux == NULL){
+		printf("No existe");
+	}else{
+		printf("%d %c\n", inodo_aux->i_num, inodo_aux->i_type);
+	}
 	fflush(stdout);
 	close(file);
 	//HASTA AQUÍ//

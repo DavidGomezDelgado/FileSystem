@@ -73,7 +73,7 @@ typedef struct {
  
  //bitmap.c
 unsigned long free_bit(struct bitmap_t *);
- 
+
  //create_inode.c
 struct inode_fs *create_inode(char, filesystem_t *);
 struct inode_fs *create_root(filesystem_t *);
@@ -81,14 +81,15 @@ struct inode_fs *create_root(filesystem_t *);
 // tree_manager.c
 struct inode_fs *existe_inode(char *, struct directory_entry *);
 struct inode_fs *inode_search (char *, struct inode_fs *, filesystem_t *);
+struct inode_fs *inode_search_path(char *, filesystem_t *);
 
 // directory_manager.c
-void make_dir (char *, char *, struct inode_fs *, filesystem_t *);
+void make_dir (char *, char *, filesystem_t *);
 // void rm_dir (char *, struct inode_fs *, filesystem_t *);
 
 // file_manager.c
 void update_entry (char *, struct inode_fs *, struct inode_fs *, filesystem_t *);
-void touch (char *, char *, struct inode_fs *, filesystem_t *);
+void touch (char *, char *, filesystem_t *);
 void clean_inode (struct inode_fs *, filesystem_t *);
 // void rename_file(char *, char *, struct inode_fs *, struct block_bitmap_fs* );
 
@@ -99,8 +100,8 @@ void remove_inode (struct inode_fs *, filesystem_t *);
 void rm (char *, struct inode_fs *, filesystem_t *);
 
 // file_operations.c
-// void file_edit(char *, char *, struct inode_fs *, struct block_bitmap_fs *);
-// char *read_file(char *,struct inode_fs *, struct block_bitmap_fs *);
+void file_edit(char *, char *, struct inode_fs *, filesystem_t *);
+char *read_file(char *name, struct inode_fs *, filesystem_t *);
 
 // directory_operations.c
 void read_directory(char *, struct inode_fs *, filesystem_t *);
