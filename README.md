@@ -1,24 +1,26 @@
 # FileSystem
-*** OBJETIVO: SABER GESTIONAR LOS BLOQUES EN TODO MOMENTO.
+*** OBJETIVO ***
+SABER GESTIONAR LOS BLOQUES EN TODO MOMENTO.
 
 *** FUNCIONES IMPLEMENTADAS ***
+- Obtener bit libre de inodo o bloque (bitmap.c)
 - Crear inodo y crear inodo raíz (create_inode.c)
-- Crear superbloque (create_inode.c)
-- Buscar inodo y bloque libre (bitmap.c)
-- Buscar inodo por nombre en directorio actual (tree_manager.c)
-- Crear fichero y directorio en directorio actual (file_manager.c)
-- Eliminar fichero (file_remove.c)
-- Eliminar inodo y dentry (file_remove.c)
-- Escribir (sobreescribir) en fichero (file_manager.c)
-- Renombrar fichero o directorio (file_operations.c)
+- Buscar fichero/directorio por inodo o por path (tree_manager.c)
+- Cear directorio por path (directory_manager.c)
+- Limpiar inodo, actualizar entrada de directorio padre y crear fichero por path (file_manager.c)
+- Renombrar/mover fichero/directorio por path (file_manager.c) -> EN PROGRESO
+- Eliminar inodo/entrada y eliminar fichero (file_remove.c)
+- Escribir (sobreescribir) y leer en fichero (file_operations.c)
+- Listar contenido de directorio (directory_operations.c)
+- Avisar de error en parámetros para FUSE (error.c)
 
 *** FUNCIONES A IMPLEMENTAR ***
 - Modificar tamaño de fichero -> truncate.
+- Mover fichero/directorio.
+- Eliminar directorio recursivamente (OPCIONAL).
 - Crear hardlinks y softlinks (OPCIONAL).
 
 *** TODO ***
-- Modificar manejo de los bitmaps -> no accedemos a través de memoria, sino a través del fichero
-- ¿Continuar con _inode_search()?
 - Gestionar ficheros y directorios a partir de un path distinto al actual (SI HAY TIEMPO).
 - Deberíamos hacer "mini funciones" para compactar el código (SI HAY TIEMPO).
 
@@ -28,8 +30,5 @@
 
 *** DUDAS ***
 - Función modificar tamaño de fichero.
-- ¿Hacemos malloc para myfilesystem?
 - ¿Cuánto espacio mapeamos para almacenar todos los bloques?
-- ¿Un bloque de entradas tiene 128 entradas?
-- ¿Distintos punteros pueden acceder al mismo bloque? -> Ya que un bloque de entradas suponemos tiene 128 entradas
-- ¿Seteamos a 1 el índice de un bloque cuando ya no tiene entradas libres o c?
+- ¿Seteamos a 1 el índice de un bloque cuando ya no tiene entradas libres?
