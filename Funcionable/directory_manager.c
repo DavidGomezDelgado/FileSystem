@@ -23,6 +23,7 @@ void make_dir (char *name, char *path, filesystem_t *private_data) {
 		}else{
 			i_directory = inode_search_path(path, private_data);
 		}
+
 		// Comprobamos si ya existe el inodo en el directorio
 		existente = inode_search(name, i_directory, private_data);
 
@@ -34,8 +35,8 @@ void make_dir (char *name, char *path, filesystem_t *private_data) {
 			update_entry(name, inode, i_directory, private_data);
 
 			// Incrementamos contador de enlaces
-			inode->i_links++;
 			i_directory->i_links++;
+			i_directory->i_tam = i_directory->i_tam + sizeof(struct directory_entry);
 
 			// Modificamos entrada .. para que apunte a su padre
 			entry = (struct directory_entry *) private_data->block[inode->i_directos[0] - private_data->superblock->reserved_block];

@@ -11,6 +11,8 @@
 #include "filesystem.h"
 
 int main(int argc, char *argv[]){
+
+	printf("inodo: %d\n", sizeof(struct inode_fs));
 	int file;
 	struct stat statbuf;
 	filesystem_t *private_data;
@@ -27,6 +29,8 @@ int main(int argc, char *argv[]){
 		perror("stat");
 		exit(EXIT_FAILURE);
 	}
+
+
 
 	private_data->superblock = mmap(NULL,sizeof(struct superblock_fs),PROT_WRITE|PROT_READ, MAP_SHARED,file, 0);
 	 if (private_data->superblock == MAP_FAILED) {
@@ -106,12 +110,12 @@ int main(int argc, char *argv[]){
 			 }
 			 i++;
 		 }
-
+/*
 		 struct inode_fs *root = create_root(private_data);
-	//**FIN DE PRUEBAS**//
+	//FIN DE PRUEBAS//
 
 
-	//**BORRAR SOLO SON PRUEBAS**//
+	//BORRAR SOLO SON PRUEBAS//
 	file = open("filesystem.txt", O_CREAT | O_RDWR, 0664);
 	fflush(stdout);
 	for(i = 0; i < private_data->block_bitmap.size; i++){
@@ -185,9 +189,9 @@ int main(int argc, char *argv[]){
 	}
 */
 
-	read_directory("/", root, private_data);
+//	read_directory("/", root, private_data);
 
-	fflush(stdout);
+//	fflush(stdout);
 /*
 	printf("Mostramos contenido de directorio1: \n");
 	aux2 = (struct directory_entry *) private_data->block[dir1->i_directos[0] - private_data->superblock->reserved_block];
@@ -197,10 +201,10 @@ int main(int argc, char *argv[]){
 		i++;
 	}
 */
-	read_directory("directorio1", dir1, private_data);
+//	read_directory("directorio1", dir1, private_data);
 
-	fflush(stdout);
-
+//	fflush(stdout);
+/*
 	rm("fichero1", root, private_data);
 	read_directory("/", root, private_data);
 
@@ -226,5 +230,6 @@ int main(int argc, char *argv[]){
 	}
 	fflush(stdout);
 	close(file);
+	*/
 	//HASTA AQUÍ//
 }

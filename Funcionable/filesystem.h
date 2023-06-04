@@ -28,19 +28,19 @@ struct inode_fs{
 	int i_links;
 	int i_directos[N_DIRECTOS]; //1280 direcciones (128 bloques cada puntero)
 	//offset en el fichero?
-	char relleno[8]; //Bytes de relleno para tener un múltiplo del tamaño del bloque
+	char relleno[4]; //Bytes de relleno para tener un múltiplo del tamaño del bloque
 };
 
 
 // Estructura que reutilizamos para bitmapb y bitmapi
 struct bitmap_t{
 	unsigned char *array;
-	uint64_t size;
+	unsigned long long size;
 };
 
 // Estructura bloque de datos
 // bloque con datos
-typedef uint8_t block_t[BLOCK_SIZE];
+typedef unsigned char block_t[BLOCK_SIZE];
 
 struct superblock_fs {
 	unsigned long magic_number;
@@ -64,6 +64,11 @@ typedef struct {
 	struct inode_fs *inode;
 	block_t *block;   //array incompleto que nos dice en cuál bloque de datos estamos
 	int fd;
+	struct timespec st_atim;  				/* fechas del fichero */
+	struct timespec st_mtim;
+	struct timespec st_ctim;
+	uid_t     st_uid;        				/* El usuario y grupo */
+	gid_t     st_gid;
 } filesystem_t;
 
 
