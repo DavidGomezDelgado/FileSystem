@@ -110,17 +110,17 @@ void file_edit(char *contenido, char *name, struct inode_fs *directory, filesyst
 //	return;
 //}
 
-char *read_file(char *name, struct inode_fs *directory, filesystem_t *private_data){
+char *read_file(char *name, char *cadenaFinal,struct inode_fs *directory, filesystem_t *private_data){
 	unsigned long i = 0, finCadena = 1;
 	char *contenido;
 	struct inode_fs *inodo = inode_search(name, directory, private_data);
-	char *cadenaFinal;
+	//~ char *cadenaFinal = NULL;
 	if(inodo->i_type == 'd'){
-		return "Esto es un directorio, no es un fichero con contenido";
+		printf ("Esto es un directorio, no es un fichero con contenido");
 	}
-	if(inodo == NULL) printf("El fichero no existe en el directorio");
+	if(inodo == NULL)  printf ("El fichero no existe en el directorio");
 	else{
-		cadenaFinal =  (char *)malloc(BLOCK_SIZE);
+		//~ cadenaFinal =  (char *)malloc(BLOCK_SIZE);
 		for(i = 0; i < N_DIRECTOS && inodo->i_directos[i] != 0 && finCadena; i++){
 			if(private_data->block[inodo->i_directos[i] - private_data->superblock->reserved_block] == NULL) finCadena = 0;
 			else {

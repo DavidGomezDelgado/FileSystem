@@ -11,8 +11,6 @@
 #include "filesystem.h"
 
 int main(int argc, char *argv[]){
-
-	printf("inodo: %d\n", sizeof(struct inode_fs));
 	int file;
 	struct stat statbuf;
 	filesystem_t *private_data;
@@ -110,7 +108,7 @@ int main(int argc, char *argv[]){
 			 }
 			 i++;
 		 }
-/*
+
 		 struct inode_fs *root = create_root(private_data);
 	//FIN DE PRUEBAS//
 
@@ -179,7 +177,7 @@ int main(int argc, char *argv[]){
 	for (i = 0; i < 10; i++) {
 		printf("Byte %ld: %#x\n", i, private_data->inode_bitmap.array[i]);
 	}
-/*
+
 	printf("Mostramos contenido de /: \n");
 	aux2 = (struct directory_entry *) private_data->block[root->i_directos[0] - private_data->superblock->reserved_block];
 	i = 0;
@@ -187,7 +185,7 @@ int main(int argc, char *argv[]){
 		printf(" nombre: %s id: %d\n", aux2[i].name, aux2[i].inode->i_num);
 		i++;
 	}
-*/
+
 
 //	read_directory("/", root, private_data);
 
@@ -204,7 +202,7 @@ int main(int argc, char *argv[]){
 //	read_directory("directorio1", dir1, private_data);
 
 //	fflush(stdout);
-/*
+
 	rm("fichero1", root, private_data);
 	read_directory("/", root, private_data);
 
@@ -217,9 +215,11 @@ int main(int argc, char *argv[]){
 	file_edit("Hola", "fichero2", root, private_data);
 	char *cadena = read_file("fichero2", root, private_data);
 	printf("La cadena es:\n%s\n",cadena);
+	free(cadena);
 	file_edit(":)", "fichero2", root, private_data);
 	char *cadena2 = read_file("fichero2", root, private_data);
 	printf("La cadena es:\n%s\n",cadena2);
+	free(cadena2);
 
 	make_dir("directorio2", "/", private_data);
 	struct inode_fs *inodo_aux = inode_search_path("/directorio2", private_data);
@@ -230,6 +230,6 @@ int main(int argc, char *argv[]){
 	}
 	fflush(stdout);
 	close(file);
-	*/
+
 	//HASTA AQUÍ//
 }

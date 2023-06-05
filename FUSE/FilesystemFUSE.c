@@ -101,6 +101,7 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 	return res;
 
 }
+fs_open (char * path/nombrefichero,  struct fuse_file_info * fi)
 
 /*************************
  ---- FUSE OPERATIONS ----
@@ -111,7 +112,7 @@ static struct fuse_operations basic_oper = {
 	//.readdir	= fs_readdir,
 	//.open		= fs_open,
 	//.read		= fs_read,
-	//.mknod		= fs_mknod,
+	//rmdir
 	//.mkdir		= fs_mkdir,
 	//.unlink		= fs_unlink,
 };
