@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <libgen.h>
 #include "filesystem.h"
 
 void set_fields (struct inode_fs *inode, struct stat *stbuf, filesystem_t *private_data) {
@@ -54,30 +55,94 @@ void set_fields (struct inode_fs *inode, struct stat *stbuf, filesystem_t *priva
 
 }
 
+/*********************************
+ ---- GET ATTRIBUTES FUNCTION ----
+ *********************************/
+
 /* stbuf: ptr a info del fichero */
 static int fs_getattr (const char *path, struct stat *stbuf) {
 
+	// El sistema llama a esta función cada vez que quiere obtener atributos de un archivo/fichero como permisos, quién es el usuario...
+
+	printf("---- Entering mi_getattr function...\n");
+	printf("---- fs_getattr - Path: %s\n", path);
+
 	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
-	struct directory_entry *entry;
+//	struct directory_entry *entry;
+	struct inode_fs *inode;
 	int res = 0;
-	int i, j;
+	char path_aux[70], base[70], dir[70];
+
+	strcpy(path_aux, path);
 	
+//	strcpy(base, basename(path_aux));
+//	strcpy(dir, dirname(path_aux));
+
+	// Obtenemos el inodo del archivo o directorio
+	inode = inode_search_path(path_aux, private_data);
+
 	memset(stbuf, 0, sizeof(struct stat));
 	
 	// Inicializamos atributos de /
-	stbuf -> st_mode = S_IFDIR | private_data->inode[0].i_permisos;   // Directorio de lectura y ejecución para group y other, y todo para user
-	stbuf -> st_nlink = private_data->inode[0].i_links;
+	if (strcmp(path, "/") == 0) {
+
+		stbuf -> st_mode = S_IFDIR | private_data->inode[0].i_permisos;   // Directorio / con permisos 0777
+		stbuf -> st_nlink = private_data->inode[0].i_links;
+
+		stbuf -> st_uid = private_data -> st_uid;
+		stbuf -> st_gid = private_data -> st_gid;
+
+		stbuf -> st_atime = private_data -> st_atime;
+		stbuf -> st_mtime = private_data -> st_mtime;
+		stbuf -> st_ctime = private_data -> st_ctime;
+
+		stbuf -> st_size = private_data->inode[0].i_tam;
+		stbuf -> st_blocks = 8;
+
+		printf("---- Attributes set successfully \\^o^/ !\n");
+
+	// Comprobamos si es directorio
+	} else if (inode->i_type == 'd') {
+
+		stbuf -> st_mode = S_IFREG | inode->i_permisos;   // Directorio con permisos 0777
+		stbuf -> st_nlink = inode->i_links;
+
+		stbuf -> st_uid = private_data -> st_uid;
+		stbuf -> st_gid = private_data -> st_gid;
+
+		stbuf -> st_atime = private_data -> st_atime;
+		stbuf -> st_mtime = private_data -> st_mtime;
+		stbuf -> st_ctime = private_data -> st_ctime;
+
+		stbuf -> st_size = inode->i_tam;
+		stbuf -> st_blocks = 8;
+
+		printf("---- Attributes set successfully \\^o^/ !\n");
+
+	// Comprobamos si es fichero
+	} else if (inode->i_type == 'f') {
+
+		stbuf -> st_mode = S_IFREG | inode->i_permisos;   // Fichero con permisos 0666
+		stbuf -> st_nlink = inode->i_links;
+
+		stbuf -> st_uid = private_data -> st_uid;
+		stbuf -> st_gid = private_data -> st_gid;
+
+		stbuf -> st_atime = private_data -> st_atime;
+		stbuf -> st_mtime = private_data -> st_mtime;
+		stbuf -> st_ctime = private_data -> st_ctime;
+
+		stbuf -> st_size = inode->i_tam;
+		//stbuf -> st_blocks = 8;
+
+		printf("---- Attributes set successfully \\^o^/ !\n");
+
+	} else {
+		printf("---- fs_getattr - No entry... \"-.-\n");
+		res = -ENOENT;
+	}
 	
-	stbuf -> st_uid = private_data -> st_uid;
-	stbuf -> st_gid = private_data -> st_gid;
-	
-	stbuf -> st_atime = private_data -> st_atime;
-	stbuf -> st_mtime = private_data -> st_mtime;
-	stbuf -> st_ctime = private_data -> st_ctime;
-	
-	stbuf -> st_size = private_data->inode[0].i_tam;
-	stbuf -> st_blocks = 8;
-	
+	/*
 	// Recorremos punteros directos del directorio
 	while (i < N_DIRECTOS && (private_data->inode[0]->i_directos[i] != 0)) {
 
@@ -95,13 +160,96 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 		}
 
 	}
-	
-	printf("---- Attributes set successfully \\^o^/ !\n");
+	*/
 	
 	return res;
 
 }
-fs_open (char * path/nombrefichero,  struct fuse_file_info * fi)
+
+/**************************
+ ---- READDIR FUNCTION ----
+ **************************/
+
+/* path: path absoluto a nuestro punto de monataje, no desde raíz del PC sino desde raíz del punto de montaje */
+static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
+
+	// El sistema llama a esta función cuando queremos leer el directorio (cuando hacemos ls, ls -l, ls -la...).
+
+	int i, j;
+	struct directory_entry *entry;
+	struct inode_fs *inode;
+	int res = 0;
+	char path_aux[70], base[70], dir[70];
+
+	printf("---- Entering fs_readdir function...\n");
+
+	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
+
+	strcpy(path_aux, path);
+
+//	strcpy(base, basename(path_aux));
+//	strcpy(dir, dirname(path_aux));
+
+	// Obtenemos el inodo del archivo o directorio
+	inode = inode_search_path(path_aux, private_data);
+
+	if (strcmp(path, "/") == 0) {
+
+		// Accedemos a sus entradas y las mostramos
+		for (i = 0; i < N_DIRECTOS && (private_data->inode[0].i_directos[i] != 0); i++) {
+			entry = (struct directory_entry *) private_data->block[private_data->inode[0].i_directos[i] - private_data->superblock->reserved_block];
+
+			j = 0;
+			while (j < max_entries && entry[j].inode != NULL) {
+				/* Indicamos qué entradas deben estar en el path */
+				if (filler(buf, entry[i].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
+					return -ENOMEM;
+				}
+				j++;
+			}
+		}
+
+	// Comprobamos si es directorio
+	} else if (inode->i_type == 'd') {
+		// Accedemos a sus entradas y las mostramos
+		for (i = 0; i < N_DIRECTOS && (private_data->inode[inode->i_num].i_directos[i] != 0); i++) {
+			entry = (struct directory_entry *) private_data->block[private_data->inode[inode->i_num].i_directos[i] - private_data->superblock->reserved_block];
+
+			j = 0;
+			while (j < max_entries && entry[j].inode != NULL) {
+				/* Indicamos qué entradas deben estar en el path */
+				if (filler(buf, entry[i].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
+					return -ENOMEM;
+				}
+				j++;
+			}
+		}
+	} else {
+		printf("fs_readdir - No entry... \"-.-\n");
+		return -ENOENT;
+	}
+
+	printf("---- Directory read successfully \\^o^/ !\n");
+
+	return res;
+
+}
+
+/************************
+ ---- MKDIR FUNCTION ----
+ ************************/
+
+static int fs_mkdir (const char *path, mode_t mode) {
+
+	int res = 0;
+
+
+
+	return res;
+
+}
+
+//fs_open (char * path/nombrefichero,  struct fuse_file_info * fi)
 
 /*************************
  ---- FUSE OPERATIONS ----
@@ -109,11 +257,11 @@ fs_open (char * path/nombrefichero,  struct fuse_file_info * fi)
 
 static struct fuse_operations basic_oper = {
 	.getattr	= fs_getattr,   
-	//.readdir	= fs_readdir,
+	.readdir	= fs_readdir,
 	//.open		= fs_open,
 	//.read		= fs_read,
 	//rmdir
-	//.mkdir		= fs_mkdir,
+	.mkdir		= fs_mkdir,
 	//.unlink		= fs_unlink,
 };
 
