@@ -135,6 +135,7 @@ int main(int argc, char *argv[]){
 //	private.block = (block_t*) mmap(NULL,statbuf.st_size-private.superblock->offset_bloques, PROT_WRITE|PROT_READ, MAP_SHARED,file, private.superblock->offset_bloques);
 //	private.fd = file;
 //
+	/*
 	create_inode('d', private_data);
 	printf("\n%d \n, %c,\n %d\n", private_data->inode[1].i_num, private_data->inode[1].i_type, private_data->inode[1].i_tam);
 	fflush(stdout);
@@ -155,54 +156,39 @@ int main(int argc, char *argv[]){
 	for (i = 0; i < 10; i++) {
 		printf("id: %d\n", private_data->inode[i].i_num);
 	}
-
+*/
 	touch("fichero1", "/" , private_data);
 	touch("fichero2", "/" , private_data);
 	make_dir("directorio1", "/", private_data);
-
-	// Buscamos inodo de directorio1
-	struct inode_fs *dir1 = inode_search_path("/directorio1", private_data);
 
 	touch("fichero3", "/directorio1", private_data);
 	touch("fichero4", "/directorio1", private_data);
 	touch("fichero5", "/directorio1", private_data);
 	touch("fichero6", "/directorio1", private_data);
+	make_dir("directorio2", "/directorio1", private_data);
 
 	// probamos para un fichero existente
 	touch("fichero5", "/directorio1/", private_data);
+
+	read_directory("/", private_data);
+	read_directory("/directorio1", private_data);
+
+	rename_file("/directorio1/fichero4", "fichero44", private_data);
+
+	read_directory("/directorio1", private_data);
+	read_directory("/directorio2", private_data);
+	read_directory("/directorio1/directorio2", private_data);
 
 	printf("Mostramos bitmap de inodos\n");
 	for (i = 0; i < 10; i++) {
 		printf("Byte %ld: %#x\n", i, private_data->inode_bitmap.array[i]);
 	}
-/*
-	printf("Mostramos contenido de /: \n");
-	aux2 = (struct directory_entry *) private_data->block[root->i_directos[0] - private_data->superblock->reserved_block];
-	i = 0;
-	while (i < 10 && aux2[i].inode != NULL) {
-		printf(" nombre: %s id: %d\n", aux2[i].name, aux2[i].inode->i_num);
-		i++;
-	}
-*/
-
-	read_directory("/", root, private_data);
-
-	fflush(stdout);
-/*
-	printf("Mostramos contenido de directorio1: \n");
-	aux2 = (struct directory_entry *) private_data->block[dir1->i_directos[0] - private_data->superblock->reserved_block];
-	i = 0;
-	while (i < 10 && aux2[i].inode != NULL) {
-		printf(" nombre: %s id: %d\n", aux2[i].name, aux2[i].inode->i_num);
-		i++;
-	}
-*/
-	read_directory("directorio1", dir1, private_data);
-
 	fflush(stdout);
 
-	rm("fichero1", root, private_data);
-	read_directory("/", root, private_data);
+	rm("/directorio1/fichero6", private_data);
+	read_directory("/directorio1", private_data);
+
+	fflush(stdout);
 
 	printf("Compruebo si se guardan bien los inodos en private_data:\n");
 	for(i = 0; i < 20; i++) {
@@ -210,21 +196,16 @@ int main(int argc, char *argv[]){
 	}
 	printf("Se guardan bien :D\n");
 
-	file_edit("Hola", "fichero2", root, private_data);
+
+	file_edit("Hola", "/fichero2", private_data);
 	char *cadena = read_file("fichero2", root, private_data);
 	printf("La cadena es:\n%s\n",cadena);
-	file_edit(":)", "fichero2", root, private_data);
+	file_edit(":)", "/fichero2", private_data);
 	char *cadena2 = read_file("fichero2", root, private_data);
 	printf("La cadena es:\n%s\n",cadena2);
 
-	make_dir("directorio2", "/", private_data);
-	struct inode_fs *inodo_aux = inode_search_path("/directorio2", private_data);
-	if(inodo_aux == NULL){
-		printf("No existe");
-	}else{
-		printf("%d %c\n", inodo_aux->i_num, inodo_aux->i_type);
-	}
 	fflush(stdout);
+
 	close(file);
 	//HASTA AQUÍ//
 }

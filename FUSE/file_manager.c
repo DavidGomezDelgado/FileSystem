@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <libgen.h>
 #include "filesystem.h"
 
 /* Añade en el inodo padre su nuevo inodo hijo */
@@ -66,35 +67,48 @@ void touch (char *name, char *path, filesystem_t *private_data) {
 	}
 }
 
-void rename_file (char *name, char *new_name, struct inode_fs *directory, struct inode_fs *dir_destino, filesystem_t *private_data) {
+void rename_file (char *path, char *new_name, filesystem_t *private_data) {
 
-	struct inode_fs *inodo = inode_search(name, directory, private_data);
+	struct inode_fs *i_directory;
+	struct inode_fs *inode;
 	struct directory_entry *entry;
 	int i, j, encontrado = 0;
+	char path_aux[70], dir[70], base[70];
 
-	if (inodo != NULL) {
+	strcpy(path_aux, path);
+
+	// Obtenemos nombre del fichero o directorio y path hasta el directorio padre
+	strcpy(base, basename(path_aux));  // Nos sirve para buscarlo en el inodo padre
+	strcpy(dir, dirname(path_aux));
+
+	inode = inode_search_path(path, private_data);
+
+	// Obtenemos inodo del padre
+	if(strcmp(path, "/") == 0){
+		i_directory = &(private_data->inode[0]);
+	}else{
+		i_directory = inode_search_path(dir, private_data);
+	}
+
+	if (inode == NULL) {
+		printf("El fichero o directorio no existe");
+	} else {
 
 		// Comprobamos si queremos renombrar o mover
 		if (new_name != NULL) {
 			// Queremos renombrar
-			for (i = 0; i < N_DIRECTOS && (directory->i_directos[i] != 0) && !encontrado; i++) {
-				entry = (struct directory_entry *) private_data->block[directory->i_directos[i] - private_data->superblock->reserved_block];
+			for (i = 0; i < N_DIRECTOS && (i_directory->i_directos[i] != 0) && !encontrado; i++) {
+				entry = (struct directory_entry *) private_data->block[i_directory->i_directos[i] - private_data->superblock->reserved_block];
 
 				for (j = 0; j < max_entries && (entry[j].inode != NULL) && !encontrado; j++) {
 					// Comprobamos el nombre
-					if (strcmp(entry[j].name, name)) {
+					if (strcmp(entry[j].name, base) == 0) {
 						strcpy(entry[j].name, new_name);
 						encontrado = 1;
 					}
 				}
 			}
 
-		}
-
-		// --- POR AQUÍ ---
-
-		if (dir_destino != NULL) {
-			// Queremos mover
 		}
 
 	}

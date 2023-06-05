@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <libgen.h>
 #include "filesystem.h"
 
 /* Eliminación de inodo tanto en inode_bitmap como el array de inodos */
@@ -94,10 +95,27 @@ void remove_dentry (char *nombre, struct inode_fs *i_directorio, filesystem_t *p
 
 }
 
-void rm (char *nombre, struct inode_fs *current_directory, filesystem_t *private_data) {
+void rm (char *path, filesystem_t *private_data) {
 
-	// Buscamos inodo
-	struct inode_fs *inode = inode_search(nombre, current_directory, private_data);
+	struct inode_fs *i_directory;
+	struct inode_fs *inode;
+	char path_aux[70], base[70], dir[70];
+
+	// Obtenemos inodo del fichero o directorio
+	inode = inode_search_path(path, private_data);
+
+	strcpy(path_aux, path);
+
+	// Obtenemos nombre del fichero o directorio y path hasta el directorio padre
+	strcpy(base, basename(path_aux));  // Nos sirve para buscarlo en el inodo padre
+	strcpy(dir, dirname(path_aux));
+
+	// Obtenemos inodo del padre
+	if(strcmp(path, "/") == 0){
+		i_directory = &(private_data->inode[0]);
+	}else{
+		i_directory = inode_search_path(dir, private_data);
+	}
 
 	if (inode == NULL) {
 		printf("No existe el fichero");
@@ -105,7 +123,7 @@ void rm (char *nombre, struct inode_fs *current_directory, filesystem_t *private
 		printf("No es un fichero\n");
 	} else {
 		// Eliminamos la entrada del directorio actual a partir de su nombre
-		remove_dentry(nombre, current_directory, private_data);  // CORREGIR !! se mueve la 1ª entrada en vez de la ultima
+		remove_dentry(base, i_directory, private_data);  // CORREGIR !! se mueve la 1ª entrada en vez de la ultima
 
 		// Eliminaos el inodo correspondiente
 		clean_inode(inode, private_data);

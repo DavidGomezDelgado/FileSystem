@@ -6,7 +6,7 @@
 
 // FUNCIÓN ENTRY_SEARCH QUE DEVUELVA ENTRADA DE UN INODO
 
-/* Creamos directorio en directorio "directory" con inodo "i_directory" */
+/* Creamos directorio a partir de un path */
 void make_dir (char *name, char *path, filesystem_t *private_data) {
 
 	struct inode_fs *i_directory;
