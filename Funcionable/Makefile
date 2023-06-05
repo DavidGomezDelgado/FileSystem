@@ -6,7 +6,7 @@ CFLAGS=-Wall-I.
 TARGET=mkFileSystem
 
 #Ficheros fuente
-SOURCES: bimap.c create_inode.c directory_manager.c directory_operations.c error.c file_manager.c file_operations.c file_remove.c mkFileSystem.c tree_manager.cÇ
+SOURCES: bitmap.c create_inode.c directory_manager.c directory_operations.c error.c file_manager.c file_operations.c file_remove.c mkFileSystem.c tree_manager.c
 
 #Fichero objeto
 OBJECT = $(TARGET).o
