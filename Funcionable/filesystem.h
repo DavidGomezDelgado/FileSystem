@@ -100,7 +100,7 @@ int rm_dir (char *, char *, filesystem_t *);
 void update_entry (char *, struct inode_fs *, struct inode_fs *, filesystem_t *);
 void touch (char *, char *, filesystem_t *);
 void clean_inode (struct inode_fs *, filesystem_t *);
-void rename_file(char *, char *, filesystem_t *);
+int rename_file(char *, char *, filesystem_t *);
 
 // file_remove.c
 struct directory_entry *search_last_entry (struct inode_fs *, filesystem_t *);  // CAUTION !!!
