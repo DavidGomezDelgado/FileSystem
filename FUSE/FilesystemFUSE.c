@@ -277,6 +277,10 @@ int main (int argc, char *argv[]) {
 	
 	if ((argc < 3) || (argv[argc-2][0] == '-') || (argv[argc-1][0] == '-')) error_parametros();
 	
+	argv[argc-2] = argv[argc-1];
+	argv[argc-1] = NULL;
+	argc--;
+
 	file = open("filesystem.img", O_RDWR);
 	if (file == -1) {
 		perror("Error al abrir el archivo");

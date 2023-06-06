@@ -17,8 +17,8 @@ int main(int argc, char *argv[]){
 	private_data = malloc(sizeof(filesystem_t));
 	//int pagesize = sysconf(_SC_PAGE_SIZE);
 
-	//file = open(argv[1], O_RDWR);
-	file = open("filesystem.img", O_RDWR);
+	file = open(argv[1], O_RDWR);
+	//file = open("filesystem.img", O_RDWR);
 	if (file == -1) {
 	   perror("Error al abrir el archivo");
 	   exit(EXIT_FAILURE);
