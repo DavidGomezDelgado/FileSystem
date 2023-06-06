@@ -1,5 +1,5 @@
-montaje = punto_montaje
-fichero = filesystem.img
+montaje=punto_montaje
+fichero=filesystem.img
 
 fuse_flags = -D_FILE_OFFSET_BITS=64 -lfuse -pthread
 
@@ -19,37 +19,37 @@ FilesystemFUSE.o: FilesystemFUSE.c filesystem.h
 	gcc -g -c -o $@ $< ${fuse_flags}
 
 bitmap.o: bitmap.c filesystem.h
-	gcc -g -c -o $@  $<
+	gcc -g -c -o $@  $< ${fuse_flags}
 
 create_inode.o: create_inode.c filesystem.h
-	gcc -g -c -o $@  $<
+	gcc -g -c -o $@  $< ${fuse_flags}
 
 directory_manager.o: directory_manager.c filesystem.h
-	gcc -g -c -o $@  $<
+	gcc -g -c -o $@  $< ${fuse_flags}
 
 directory_operations.o: directory_operations.c filesystem.h
-	gcc -g -c -o $@  $<
+	gcc -g -c -o $@  $< ${fuse_flags}
 
 error.o: error.c filesystem.h
-	gcc -g -c -o $@  $<
+	gcc -g -c -o $@  $< ${fuse_flags}
 
 file_manager.o: file_manager.c filesystem.h
-	gcc -g -c -o $@  $<
+	gcc -g -c -o $@  $< ${fuse_flags}
 
 file_operations.o: file_operations.c filesystem.h
-	gcc -g -c -o $@  $<
+	gcc -g -c -o $@  $< ${fuse_flags}
 
 file_remove.o: file_remove.c filesystem.h
-	gcc -g -c -o $@  $<
+	gcc -g -c -o $@  $< ${fuse_flags}
 
 tree_manager.o: tree_manager.c filesystem.h
-	gcc -g -c -o $@  $<
+	gcc -g -c -o $@  $< ${fuse_flags}
 
 mount: FilesystemFUSE
 	./FilesystemFUSE $(fichero) $(montaje)
 	
 printf: FilesystemFUSE
-	./FilesystemFUSE -f $(fichero) $(montaje))
+	./FilesystemFUSE -f $(fichero) $(montaje)
 	
 clean:
 	rm *.o FileSystemFUSE

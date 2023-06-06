@@ -9,51 +9,6 @@
 #include <libgen.h>
 #include "filesystem.h"
 
-void set_fields (struct inode_fs *inode, struct stat *stbuf, filesystem_t *private_data) {
-	
-	int j, i = 0;
-	struct directory_entry *entry;
-	
-	// Inicializamos atributos
-	stbuf -> st_nlink = private_data->inode[inode->i_num].i_links;   
-	
-	stbuf -> st_uid = private_data -> st_uid;
-	stbuf -> st_gid = private_data -> st_gid;
-	
-	stbuf -> st_atime = private_data -> st_atime;
-	stbuf -> st_mtime = private_data -> st_mtime;
-	stbuf -> st_ctime = private_data -> st_ctime;
-	
-	stbuf -> st_size = private_data->inode[inode->i_num].i_tam;
-	
-	if (inode->i_type == 'd') {
-		stbuf -> st_mode = S_IFDIR | inode->i_permisos;   // Directorio de lectura
-		stbuf -> st_blocks = 8;
-	
-		// Recorremos punteros directos del directorio
-		while (i < N_DIRECTOS && (inode->i_directos[i] != 0)) {
-
-			// Obtenemos entradas del bloque apuntado por el puntero directo
-			entry = (struct directory_entry *) private_data->block[inode->i_directos[i] - private_data->superblock->reserved_block];
-
-			// Recorremos entradas
-			for (j = 0; j < 128 && (entry[j].inode != NULL); j++) {
-				if (strcmp(entry[j].name, ".") != 0 || strcmp(entry[j].name, "..") != 0) {
-					set_fields (entry[j].inode, stbuf, private_data);
-				}
-
-				i++;
-
-			}
-
-		}
-
-	} else {
-		stbuf -> st_mode = S_IFREG | inode->i_permisos;   // Fichero regular
-		// stbuf -> st_blocks = 8;  // DUDA
-	}
-
-}
 
 /*********************************
  ---- GET ATTRIBUTES FUNCTION ----
@@ -84,7 +39,7 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 	
 	// Inicializamos atributos de /
 	if (strcmp(path, "/") == 0) {
-
+		
 		stbuf -> st_mode = S_IFDIR | private_data->inode[0].i_permisos;   // Directorio / con permisos 0777
 		stbuf -> st_nlink = private_data->inode[0].i_links;
 
@@ -104,10 +59,15 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 
 		// Obtenemos el inodo del archivo o directorio
 		inode = inode_search_path(path_aux, private_data);
-
 		if (inode == NULL) {
 			printf("---- fs_getattr - No entry... \"-.-\n");
 			res = -ENOENT;
+			return res;
+		}
+		if (inode->i_type == 'd') {
+			stbuf -> st_mode = S_IFDIR | inode->i_permisos;   // Directorio con permisos 0777
+		} else if (inode->i_type == 'f') {
+			stbuf -> st_mode = S_IFREG | inode->i_permisos;   // Fichero con permisos 0666
 		}
 
 		stbuf -> st_nlink = inode->i_links;
@@ -120,13 +80,8 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 		stbuf -> st_ctime = private_data -> st_ctime;
 
 		stbuf -> st_size = inode->i_tam;
-		//stbuf -> st_blocks = 8;
+		stbuf -> st_blocks = 8;
 
-		if (inode->i_type == 'd') {
-			stbuf -> st_mode = S_IFDIR | inode->i_permisos;   // Directorio con permisos 0777
-		} else if (inode->i_type == 'f') {
-			stbuf -> st_mode = S_IFREG | inode->i_permisos;   // Fichero con permisos 0666
-		}
 
 	}
 	
@@ -170,7 +125,8 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 			j = 0;
 			while (j < max_entries && entry[j].inode != NULL) {
 				/* Indicamos qué entradas deben estar en el path */
-				if (filler(buf, entry[i].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
+				if (filler(buf, entry[j].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
+					break;
 					return -ENOMEM;
 				}
 				j++;
@@ -181,7 +137,7 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 	} else {
 		// Obtenemos el inodo del archivo o directorio
 		inode = inode_search_path(path_aux, private_data);
-
+		
 		if (inode == NULL) {
 			printf("---- fs_getattr - No entry... \"-.-\n");
 			res = -ENOENT;
@@ -194,7 +150,8 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 			j = 0;
 			while (j < max_entries && entry[j].inode != NULL) {
 				/* Indicamos qué entradas deben estar en el path */
-				if (filler(buf, entry[i].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
+				if (filler(buf, entry[j].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
+					break;
 					return -ENOMEM;
 				}
 				j++;
@@ -221,6 +178,7 @@ static int fs_mkdir (const char *path, mode_t mode) {
 	printf("---- Entering fs_mkdir function...\n");
 
 	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
+	
 
 	strcpy(path_aux, path);
 
@@ -255,6 +213,14 @@ static int fs_rmdir (const char *path) {
 
 	strcpy(base, basename(path_aux));
 	strcpy(dir, dirname(path_aux));
+	
+	if(rm_dir(base, dir, private_data) == -1){
+		return -ENOENT;
+	}else if (rm_dir(base,dir, private_data) == 1){
+		return -ENOTEMPTY;
+	}
+	
+	printf("---- Directory deleted succesfully \\ô^/ !\n");
 
 	return res;
 
@@ -281,20 +247,17 @@ static struct fuse_operations basic_oper = {
  **********************/
 
 int main (int argc, char *argv[]) {
-
+	printf("Aqui empieza\n");
 	filesystem_t *private_data = malloc(sizeof(filesystem_t));
 	int file;
 	struct stat fileStat;
 	
 	if ((argc < 3) || (argv[argc-2][0] == '-') || (argv[argc-1][0] == '-')) error_parametros();
+	printf("%s\n", argv[2]);
 	
-//	argv[argc-2] = argv[argc-1];
-//	argv[argc-1] = NULL;
-//	argc--;
-
 	// NOS DA ERROR INVALID ARGUMENT: punto_montaje
-
-	file = open(argv[1], O_RDWR);
+	printf("%s\n", argv[1]);
+	file = open(argv[1], O_RDWR, 0666);
 	//file = open("filesystem.img", O_RDWR, 0666);
 	if (file == -1) {
 		perror("Error al abrir el archivo");
@@ -306,6 +269,9 @@ int main (int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+	argv[argc-2] = argv[argc-1];
+	argv[argc-1] = NULL;
+	argc--;
 	// Inicializamos estructura	
 	private_data->superblock = mmap(NULL, sizeof(struct superblock_fs), PROT_WRITE|PROT_READ, MAP_SHARED,file, 0);
 	private_data->block_bitmap.size = private_data->superblock->num_blocks/8;
@@ -325,7 +291,7 @@ int main (int argc, char *argv[]) {
 	private_data -> st_mtime = fileStat.st_mtime;
 
 	close(file);
-	
+	printf("Aqui termina\n");
 	return fuse_main(argc, argv, &basic_oper, private_data);
 
 }
