@@ -1,6 +1,10 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #define N_DIRECTOS 10
 //#define N_SIMPLES  1
 //#define N_DOBLES 1
@@ -89,27 +93,30 @@ struct inode_fs *inode_search (char *, struct inode_fs *, filesystem_t *);
 struct inode_fs *inode_search_path(char *, filesystem_t *);
 
 // directory_manager.c
-void make_dir (char *, char *, filesystem_t *);
-// void rm_dir (char *, struct inode_fs *, filesystem_t *);
+int make_dir (char *, char *, filesystem_t *);
+int rm_dir (char *, char *, filesystem_t *);
 
 // file_manager.c
 void update_entry (char *, struct inode_fs *, struct inode_fs *, filesystem_t *);
 void touch (char *, char *, filesystem_t *);
 void clean_inode (struct inode_fs *, filesystem_t *);
-// void rename_file(char *, char *, struct inode_fs *, struct block_bitmap_fs* );
+void rename_file(char *, char *, filesystem_t *);
 
 // file_remove.c
 struct directory_entry *search_last_entry (struct inode_fs *, filesystem_t *);  // CAUTION !!!
 void remove_dentry (char *, struct inode_fs *, filesystem_t *);
 void remove_inode (struct inode_fs *, filesystem_t *);
-void rm (char *, struct inode_fs *, filesystem_t *);
+void rm (char *, filesystem_t *);
 
 // file_operations.c
-void file_edit(char *, char *, struct inode_fs *, filesystem_t *);
-char *read_file(char *name, struct inode_fs *, filesystem_t *);
+void file_edit(char *, char *, filesystem_t *);
+char *read_file(char *, struct inode_fs*, filesystem_t *);
 
 // directory_operations.c
-void read_directory(char *, struct inode_fs *, filesystem_t *);
+void read_directory(char *, filesystem_t *);
+
+// error.c
+void error_parametros();
 
 //
 // //file_manager.c

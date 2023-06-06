@@ -1,12 +1,12 @@
 #Variables
 CC = gcc
-CFLAGS=-Wall-I.
+CFLAGS=-Wall -I.
 
 #NOmbre del fihcero objeto
 TARGET=mkFileSystem
 
 #Ficheros fuente
-SOURCES: bitmap.c create_inode.c directory_manager.c directory_operations.c error.c file_manager.c file_operations.c file_remove.c mkFileSystem.c tree_manager.c
+SOURCES= bitmap.c create_inode.c directory_manager.c directory_operations.c error.c file_manager.c file_operations.c file_remove.c mkFileSystem.c tree_manager.c
 
 #Fichero objeto
 OBJECT = $(TARGET).o
@@ -18,19 +18,20 @@ DEFAULT_COUNT = 100
 #Para crear el objeto, dependemos de los sources.
 #$^ hace referencia a lo que depende el objeto, es como poner $(SOURCE)
 #$@ se refiere al objetivo actual, en este caso podríamos poner también $(OBJECT)
+
 $(OBJECT): $(SOURCES)
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) $(CFLAGS) $(SOURCES) -o $(TARGET)
 	
 image:
-	dd if=/dev/zero of=filesystem.img bs=4096 count=$(COUNT)
+	dd if=/dev/zero of=../FUSE/filesystem.img bs=4096 count=$(COUNT)
 
 clean:
-	rm -f $(OBJECT) filesystem.img
+	rm -f *.o $(OBJECT) $(TARGET) ../FUSE/filesystem.img
 	
 .PHONY: image clean
 
 # Establecer valor predeterminado para COUNT en caso de que lo introduzcamos
 ifndef COUNT
-COUNT = $(DEFAULT_COUNT)
+COUNT := $(DEFAULT_COUNT)
 endif
 

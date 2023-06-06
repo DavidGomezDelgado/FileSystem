@@ -3,30 +3,44 @@
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
+#include <libgen.h>
 #include "filesystem.h"
 
-void file_edit(char *contenido, char *name, struct inode_fs *directory, filesystem_t *private_data){
+// MODIFICAR SEGÚN FUNCIÓN WRITE DE FUSE
+void file_edit(char *contenido, char *path, /*char *name, struct inode_fs *directory,*/ filesystem_t *private_data){
 	char* cadena;
+	struct inode_fs *inode;
 	unsigned long i, j, k, buffer = strlen(contenido) + 1, bloques;
+	char path_aux[70], dir[70], base[70];
+
 	if(buffer > BLOCK_SIZE*10){
 		printf("La cadena que quiere introducir es demasiado grande\n");
 		return;
 	}
-	struct inode_fs *inodo =  inode_search(name, directory, private_data);;
-	if(inodo->i_type == 'd'){
+
+	strcpy(path_aux, path);
+
+	// Obtenemos nombre del fichero o directorio y path hasta el directorio padre
+	strcpy(base, basename(path_aux));  // Nos sirve para buscarlo en el inodo padre
+	strcpy(dir, dirname(path_aux));
+
+	// Obtenemos inodo del fichero o directorio
+	inode = inode_search_path(path, private_data);
+
+	if(inode->i_type == 'd'){
 		printf("Esto es un directorio, no es un fichero con contenido");
 		return;
 	}
 	if(strcmp(contenido, "") != 0){
-		if(inodo == NULL){
+		if(inode == NULL){
 			printf("No existe el fichero \n");
 			return;
 		}
-		clean_inode(inodo, private_data);
-		inodo->i_tam = buffer;
+		clean_inode(inode, private_data);
+		inode->i_tam = buffer;
 		if(buffer < BLOCK_SIZE){
-			inodo->i_directos[0] = free_bit(&(private_data->block_bitmap));
-			cadena = (char *) private_data->block[inodo->i_directos[0] - private_data->superblock->reserved_block];
+			inode->i_directos[0] = free_bit(&(private_data->block_bitmap));
+			cadena = (char *) private_data->block[inode->i_directos[0] - private_data->superblock->reserved_block];
 			for(j = 0; j< buffer-1; j++){
 				cadena[j] = contenido[j];
 			}
@@ -37,17 +51,17 @@ void file_edit(char *contenido, char *name, struct inode_fs *directory, filesyst
 				bloques = buffer/BLOCK_SIZE  +1;
 			}
 			for(i = 0; i < bloques && i < N_DIRECTOS; i++){
-				 inodo->i_directos[i] = free_bit(&(private_data->block_bitmap));
+				 inode->i_directos[i] = free_bit(&(private_data->block_bitmap));
 			}
 			for(i = 0; i < bloques - 1 && i < N_DIRECTOS; i++){
-				cadena = (char *) private_data->block[inodo->i_directos[i] - private_data->superblock->reserved_block];
+				cadena = (char *) private_data->block[inode->i_directos[i] - private_data->superblock->reserved_block];
 				for(j = 0; j < BLOCK_SIZE; j++){
 					cadena[j] = contenido[BLOCK_SIZE*i + j];
 				}
-				memcpy(private_data->block[inodo->i_directos[i] - private_data->superblock->reserved_block], cadena, BLOCK_SIZE);
+				memcpy(private_data->block[inode->i_directos[i] - private_data->superblock->reserved_block], cadena, BLOCK_SIZE);
 			}
 			//En la última iteración la cadena puede ser menor que BLOCK_SIZE
-			cadena = (char *) private_data->block[inodo->i_directos[bloques-1] - private_data->superblock->reserved_block];
+			cadena = (char *) private_data->block[inode->i_directos[bloques-1] - private_data->superblock->reserved_block];
 			for(j = 0, k = 0; j < buffer && k < BLOCK_SIZE ; j++, k++){
 				cadena[j] = contenido[BLOCK_SIZE*(bloques-1) + k];
 			}
@@ -110,17 +124,18 @@ void file_edit(char *contenido, char *name, struct inode_fs *directory, filesyst
 //	return;
 //}
 
-char *read_file(char *name, char *cadenaFinal,struct inode_fs *directory, filesystem_t *private_data){
+// MODIFICAR SEGÚN FUNCIÓN READ DE FUSE
+char *read_file(char *name, struct inode_fs *directory, filesystem_t *private_data){
 	unsigned long i = 0, finCadena = 1;
 	char *contenido;
 	struct inode_fs *inodo = inode_search(name, directory, private_data);
-	//~ char *cadenaFinal = NULL;
+	char *cadenaFinal;
 	if(inodo->i_type == 'd'){
-		printf ("Esto es un directorio, no es un fichero con contenido");
+		return "Esto es un directorio, no es un fichero con contenido";
 	}
-	if(inodo == NULL)  printf ("El fichero no existe en el directorio");
+	if(inodo == NULL) printf("El fichero no existe en el directorio");
 	else{
-		//~ cadenaFinal =  (char *)malloc(BLOCK_SIZE);
+		cadenaFinal =  (char *)malloc(BLOCK_SIZE);
 		for(i = 0; i < N_DIRECTOS && inodo->i_directos[i] != 0 && finCadena; i++){
 			if(private_data->block[inodo->i_directos[i] - private_data->superblock->reserved_block] == NULL) finCadena = 0;
 			else {
