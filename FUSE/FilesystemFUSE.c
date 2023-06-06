@@ -10,9 +10,9 @@
 #include "filesystem.h"
 
 
-/*********************************
- ---- GET ATTRIBUTES FUNCTION ----
- *********************************/
+/**************************
+ ---- GETATTR FUNCTION ----
+ **************************/
 
 /* stbuf: ptr a info del fichero */
 static int fs_getattr (const char *path, struct stat *stbuf) {
@@ -91,6 +91,7 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 
 }
 
+
 /**************************
  ---- READDIR FUNCTION ----
  **************************/
@@ -166,6 +167,7 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 
 }
 
+
 /************************
  ---- MKDIR FUNCTION ----
  ************************/
@@ -195,8 +197,9 @@ static int fs_mkdir (const char *path, mode_t mode) {
 
 }
 
+
 /************************
- ---- MKDIR FUNCTION ----
+ ---- RMDIR FUNCTION ----
  ************************/
 
 static int fs_rmdir (const char *path) {
@@ -226,7 +229,59 @@ static int fs_rmdir (const char *path) {
 
 }
 
+
+/*************************
+ ---- UNLINK FUNCTION ----
+ *************************/
+
+
+/*************************
+ ---- RENAME FUNCTION ----
+ *************************/
+
+static int fs_rename (const char *oldpath, const char *newpath, unsigned int flags) {
+
+	int res = 0;
+	struct inode_fs *inode;
+	struct directort_entry *entry;
+	char path_aux[70], base[70], dir[70];
+
+	printf("---- Entering fs_rename function...\n");
+
+	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
+
+	strcpy(path_aux, newpath);
+
+	strcpy(base, basename(path_aux));
+	strcpy(dir, dirname(path_aux));
+
+	if (rename_file(oldpath, base, private_data) == -1) {
+		return -ENOENT;
+	}
+
+	printf("---- Directory or file renamed successfully \\^o^/ !\n");
+
+	return res;
+
+}
+
+
+/***********************
+ ---- OPEN FUNCTION ----
+ ***********************/
+
 //fs_open (char * path/nombrefichero,  struct fuse_file_info * fi)
+
+
+/***********************
+ ---- READ FUNCTION ----
+ ***********************/
+ 
+
+/************************
+ ---- WRITE FUNCTION ----
+ ************************/
+ 
 
 /*************************
  ---- FUSE OPERATIONS ----
@@ -237,9 +292,11 @@ static struct fuse_operations basic_oper = {
 	.readdir	= fs_readdir,
 	//.open		= fs_open,
 	//.read		= fs_read,
+	//.write	= fs_write,
 	.rmdir		= fs_rmdir,
 	.mkdir		= fs_mkdir,
 	//.unlink		= fs_unlink,
+	.rename		= fs_rename,
 };
 
 /**********************
