@@ -93,8 +93,8 @@ struct inode_fs *inode_search (char *, struct inode_fs *, filesystem_t *);
 struct inode_fs *inode_search_path(char *, filesystem_t *);
 
 // directory_manager.c
-void make_dir (char *, char *, filesystem_t *);
-// void rm_dir (char *, struct inode_fs *, filesystem_t *);
+int make_dir (char *, char *, filesystem_t *);
+int rm_dir (char *, char *, filesystem_t *);
 
 // file_manager.c
 void update_entry (char *, struct inode_fs *, struct inode_fs *, filesystem_t *);

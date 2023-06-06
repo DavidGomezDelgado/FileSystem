@@ -16,9 +16,18 @@ int main(int argc, char *argv[]){
 	filesystem_t *private_data;
 	private_data = malloc(sizeof(filesystem_t));
 	//int pagesize = sysconf(_SC_PAGE_SIZE);
+	char path[50];
 
-	file = open(argv[1], O_RDWR);
-	//file = open("filesystem.img", O_RDWR);
+	if (argc < 2) {
+		printf("Uso: %s <nombre_archivo>\n", argv[0]);
+		return 1;
+	}
+
+	strcpy(path, "../FUSE/");
+	strcat(path, argv[1]);
+
+	file = open(path, O_RDWR);
+	//file = open("../FUSE/filesystem.img", O_RDWR);
 	if (file == -1) {
 	   perror("Error al abrir el archivo");
 	   exit(EXIT_FAILURE);
@@ -186,6 +195,17 @@ int main(int argc, char *argv[]){
 	fflush(stdout);
 
 	rm("/directorio1/fichero6", private_data);
+	read_directory("/directorio1", private_data);
+
+	printf("Probamos rm_dir\n");
+
+	rm_dir("directorio1", "/", private_data);
+	rm_dir("directorio2", "/directorio1", private_data);
+
+	printf("Fin de pruebas de rm_dir\n");
+
+	read_directory("/directorio1/directorio2", private_data);
+	fflush(stdout);
 	read_directory("/directorio1", private_data);
 
 	fflush(stdout);

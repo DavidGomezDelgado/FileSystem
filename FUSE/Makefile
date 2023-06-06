@@ -3,9 +3,6 @@ fichero = filesystem.img
 
 fuse_flags = -D_FILE_OFFSET_BITS=64 -lfuse -pthread
 
-#Valor predeterminado de COUNT en caso de no pasarle ninguno por parámetro
-DEFAULT_COUNT = 100
-
 #Ficheros objeto
 SOURCES = bitmap.o create_inode.o directory_manager.o directory_operations.o error.o file_manager.o file_operations.o file_remove.o tree_manager.o FilesystemFUSE.o
 
@@ -48,24 +45,17 @@ file_remove.o: file_remove.c filesystem.h
 tree_manager.o: tree_manager.c filesystem.h
 	gcc -g -c -o $@  $<
 
-image:
-	dd if=/dev/zero of=filesystem.img bs=4096 count=$(COUNT)
-	
 mount: FilesystemFUSE
 	./FilesystemFUSE $(fichero) $(montaje)
 	
 printf: FilesystemFUSE
-	./FilesystemFUSE -f $(fichero) $(montaje)
+	./FilesystemFUSE -f $(fichero) $(montaje))
 	
 clean:
-	rm *.o
+	rm *.o FileSystemFUSE
 	
 umount:
 	fusermount -u $(montaje)
 
-.PHONY: image clean
+.PHONY: clean
 
-# Establecer valor predeterminado para COUNT en caso de que lo introduzcamos
-ifndef COUNT
-COUNT = $(DEFAULT_COUNT)
-endif
