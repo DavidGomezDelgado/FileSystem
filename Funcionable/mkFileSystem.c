@@ -116,13 +116,12 @@ int main(int argc, char *argv[]){
 			 i++;
 		 }
 
-	//struct inode_fs *root = 
-	create_root(private_data);
+		 struct inode_fs *root = create_root(private_data);
 	//**FIN DE PRUEBAS**//
 
 
 	//**BORRAR SOLO SON PRUEBAS**//
-/*	file = open("filesystem.txt", O_CREAT | O_RDWR, 0664);
+	file = open("filesystem.txt", O_CREAT | O_RDWR, 0664);
 	fflush(stdout);
 	for(i = 0; i < private_data->block_bitmap.size; i++){
 		printf("%#x\n", private_data->block_bitmap.array[i]);
@@ -145,7 +144,7 @@ int main(int argc, char *argv[]){
 //	private.block = (block_t*) mmap(NULL,statbuf.st_size-private.superblock->offset_bloques, PROT_WRITE|PROT_READ, MAP_SHARED,file, private.superblock->offset_bloques);
 //	private.fd = file;
 //
-
+	/*
 	create_inode('d', private_data);
 	printf("\n%d \n, %c,\n %d\n", private_data->inode[1].i_num, private_data->inode[1].i_type, private_data->inode[1].i_tam);
 	fflush(stdout);
@@ -167,7 +166,7 @@ int main(int argc, char *argv[]){
 		printf("id: %d\n", private_data->inode[i].i_num);
 	}
 */
-	/*touch("fichero1", "/" , private_data);
+	touch("fichero1", "/" , private_data);
 	touch("fichero2", "/" , private_data);
 	make_dir("directorio1", "/", private_data);
 
@@ -177,13 +176,18 @@ int main(int argc, char *argv[]){
 	touch("fichero6", "/directorio1", private_data);
 	make_dir("directorio2", "/directorio1", private_data);
 
+	fflush(stdout);
+
 	// probamos para un fichero existente
 	touch("fichero5", "/directorio1/", private_data);
 
 	read_directory("/", private_data);
 	read_directory("/directorio1", private_data);
 
+	printf("Probamos renombrar fichero\n");
 	rename_file("/directorio1/fichero4", "fichero44", private_data);
+	printf("Probamos renombrar directorio\n");
+	rename_file("/directorio1/directorio2", "directorio3", private_data);
 
 	read_directory("/directorio1", private_data);
 	read_directory("/directorio2", private_data);
@@ -227,6 +231,6 @@ int main(int argc, char *argv[]){
 
 	fflush(stdout);
 
-	close(file);*/
+	close(file);
 	//HASTA AQUÍ//
 }

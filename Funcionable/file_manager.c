@@ -67,10 +67,12 @@ void touch (char *name, char *path, filesystem_t *private_data) {
 	}
 }
 
-void rename_file (char *path, char *new_name, filesystem_t *private_data) {
+int rename_file (char *path, char *new_name, filesystem_t *private_data) {
 
+	int res = 0;
 	struct inode_fs *i_directory;
 	struct inode_fs *inode;
+	struct inode_fs *inode_dst;   // para comprobar si ya existe alguien con el nombre new_name
 	struct directory_entry *entry;
 	int i, j, encontrado = 0;
 	char path_aux[70], dir[70], base[70];
@@ -91,27 +93,41 @@ void rename_file (char *path, char *new_name, filesystem_t *private_data) {
 	}
 
 	if (inode == NULL) {
-		printf("El fichero o directorio no existe");
+//		printf("El fichero o directorio no existe");
+		return -1;
 	} else {
 
-		// Comprobamos si queremos renombrar o mover
-		if (new_name != NULL) {
-			// Queremos renombrar
-			for (i = 0; i < N_DIRECTOS && (i_directory->i_directos[i] != 0) && !encontrado; i++) {
-				entry = (struct directory_entry *) private_data->block[i_directory->i_directos[i] - private_data->superblock->reserved_block];
+		inode_dst = inode_search(new_name, i_directory, private_data);
 
-				for (j = 0; j < max_entries && (entry[j].inode != NULL) && !encontrado; j++) {
-					// Comprobamos el nombre
-					if (strcmp(entry[j].name, base) == 0) {
-						strcpy(entry[j].name, new_name);
-						encontrado = 1;
-					}
-				}
-			}
+		// Comprobamos si existe algún archivo con el nombre new_name (sólo si es fichero)
+		if (inode_dst != NULL && inode_dst->i_type == 'f') {
+			// Existe y podemos reemplazarlo
+			printf("Existe entrada con ese nombre... Borramos la existente\n");
+
+			// Eliminamos la entrada del directorio actual a partir de su nombre
+			remove_dentry(new_name, i_directory, private_data);
+
+			// Eliminaos el inodo correspondiente
+			clean_inode(inode_dst, private_data);
+			remove_inode(inode_dst, private_data);
 
 		}
 
+		for (i = 0; i < N_DIRECTOS && (i_directory->i_directos[i] != 0) && !encontrado; i++) {
+			entry = (struct directory_entry *) private_data->block[i_directory->i_directos[i] - private_data->superblock->reserved_block];
+
+			for (j = 0; j < max_entries && (entry[j].inode != NULL) && !encontrado; j++) {
+				// Comprobamos el nombre
+				if (strcmp(entry[j].name, base) == 0) {
+					strcpy(entry[j].name, new_name);
+					encontrado = 1;
+				}
+			}
+		}
+
 	}
+
+	return res;
 
 }
 

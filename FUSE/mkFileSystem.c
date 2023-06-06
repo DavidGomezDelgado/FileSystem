@@ -176,13 +176,18 @@ int main(int argc, char *argv[]){
 	touch("fichero6", "/directorio1", private_data);
 	make_dir("directorio2", "/directorio1", private_data);
 
+	fflush(stdout);
+
 	// probamos para un fichero existente
 	touch("fichero5", "/directorio1/", private_data);
 
 	read_directory("/", private_data);
 	read_directory("/directorio1", private_data);
 
+	printf("Probamos renombrar fichero\n");
 	rename_file("/directorio1/fichero4", "fichero44", private_data);
+	printf("Probamos renombrar directorio\n");
+	rename_file("/directorio1/directorio2", "directorio3", private_data);
 
 	read_directory("/directorio1", private_data);
 	read_directory("/directorio2", private_data);

@@ -52,7 +52,7 @@ printf: FilesystemFUSE
 	./FilesystemFUSE -f $(fichero) $(montaje)
 	
 clean:
-	rm *.o FileSystemFUSE
+	rm *.o FilesystemFUSE
 	
 umount:
 	fusermount -u $(montaje)
