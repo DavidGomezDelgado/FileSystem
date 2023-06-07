@@ -98,7 +98,7 @@ int rm_dir (char *, char *, filesystem_t *);
 
 // file_manager.c
 void update_entry (char *, struct inode_fs *, struct inode_fs *, filesystem_t *);
-void touch (char *, char *, filesystem_t *);
+int touch (char *, char *, filesystem_t *);
 void clean_inode (struct inode_fs *, filesystem_t *);
 int rename_file(char *, char *, filesystem_t *);
 

@@ -32,8 +32,9 @@ void update_entry (char *name, struct inode_fs *hijo, struct inode_fs *padre, fi
 }
 
 /* Creamos fichero en directorio "directory" con inodo "i_directory" */
-void touch (char *name, char *path, filesystem_t *private_data) {
+int touch (char *name, char *path, filesystem_t *private_data) {
 
+	int res = 0;
 	struct inode_fs *i_directory;
 	struct inode_fs *existente;
 	struct inode_fs *inode;
@@ -61,10 +62,13 @@ void touch (char *name, char *path, filesystem_t *private_data) {
 			i_directory->i_links++;
 
 		} else {
-			printf("Ya existe el fichero o directorio\n");
+			// printf("Ya existe el fichero o directorio\n");
+			res = -1;
 		}
 
 	}
+
+	return res;
 }
 
 int rename_file (char *path, char *new_name, filesystem_t *private_data) {

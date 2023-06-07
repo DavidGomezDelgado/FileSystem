@@ -47,6 +47,9 @@ tree_manager.o: tree_manager.c filesystem.h
 
 mount: FilesystemFUSE
 	./FilesystemFUSE $(fichero) $(montaje)
+
+debug: FilesystemFUSE
+	./FilesystemFUSE -d $(fichero) $(montaje)
 	
 printf: FilesystemFUSE
 	./FilesystemFUSE -f $(fichero) $(montaje)
