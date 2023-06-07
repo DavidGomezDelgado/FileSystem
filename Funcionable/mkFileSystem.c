@@ -37,7 +37,7 @@ int main(int argc, char *argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	private_data->superblock = mmap(NULL,sizeof(struct superblock_fs),PROT_WRITE|PROT_READ, MAP_SHARED,file, 0);
+	private_data->superblock = (struct superblock_fs *) mmap(NULL,sizeof(struct superblock_fs),PROT_WRITE|PROT_READ, MAP_SHARED,file, 0);
 	 if (private_data->superblock == MAP_FAILED) {
 		 perror("Error al mapear el archivo");
 		 close(file);
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]){
 
 
 	//**BORRAR SOLO SON PRUEBAS**//
-	file = open("filesystem.txt", O_CREAT | O_RDWR, 0664);
+	/*file = open("filesystem.txt", O_CREAT | O_RDWR, 0664);
 	fflush(stdout);
 	for(i = 0; i < private_data->block_bitmap.size; i++){
 		printf("%#x\n", private_data->block_bitmap.array[i]);
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]){
 	struct directory_entry *aux = (struct directory_entry*) private_data->block[private_data->inode[0].i_directos[0] - private_data->superblock->reserved_block];
 	for(i = 0; i < 2; i++){
 		printf("%s %d\n", aux[i].name, aux[i].inode->i_num);
-	}
+	}*/
 
 //	private_data private;
 //
@@ -166,7 +166,7 @@ int main(int argc, char *argv[]){
 		printf("id: %d\n", private_data->inode[i].i_num);
 	}
 */
-	touch("fichero1", "/" , private_data);
+	/*touch("fichero1", "/" , private_data);
 	touch("fichero2", "/" , private_data);
 	make_dir("directorio1", "/", private_data);
 
@@ -229,7 +229,7 @@ int main(int argc, char *argv[]){
 	char *cadena2 = read_file("fichero2", root, private_data);
 	printf("La cadena es:\n%s\n",cadena2);
 
-	fflush(stdout);
+	fflush(stdout);*/
 
 	close(file);
 	//HASTA AQUÍ//

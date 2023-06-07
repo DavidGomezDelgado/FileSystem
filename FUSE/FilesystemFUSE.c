@@ -139,8 +139,9 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 		inode = inode_search_path(path_aux, private_data);
 		
 		if (inode == NULL) {
-			printf("---- fs_getattr - No entry... \"-.-\n");
+			printf("---- fs_readdir - No entry... \"-.-\n");
 			res = -ENOENT;
+			return res;
 		}
 
 		// Accedemos a sus entradas y las mostramos
@@ -410,7 +411,7 @@ int main (int argc, char *argv[]) {
 
 	private_data->inode = mmap(NULL,private_data->superblock->bitmapi_offset - private_data->superblock->bitmapb_offset, PROT_WRITE|PROT_READ, MAP_SHARED,file, private_data->superblock->offset_inodos);
 	private_data->block = (block_t*) mmap(NULL,fileStat.st_size-private_data->superblock->offset_bloques, PROT_WRITE|PROT_READ, MAP_SHARED,file, private_data->superblock->offset_bloques);
-	private_data->fd = file;
+	//private_data->fd = file;
 	
 	private_data -> st_uid = fileStat.st_uid;
 	private_data -> st_gid = fileStat.st_gid;

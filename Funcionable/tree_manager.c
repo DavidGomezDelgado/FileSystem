@@ -45,7 +45,7 @@ struct inode_fs *inode_search (char *name, struct inode_fs *directory, filesyste
 /* Devuelve el inodo del fichero o directorio direccionado por un path */
 struct inode_fs *inode_search_path(char *path, filesystem_t *private_data){
 	char* nombre_dir;
-	char *camino = (char*) malloc(sizeof(path) + 1);
+	char camino[1000];
 	if(path == NULL){
 		printf("No ha introducido ningún path");
 		return NULL;
@@ -60,7 +60,6 @@ struct inode_fs *inode_search_path(char *path, filesystem_t *private_data){
 			nombre_dir = strtok(NULL, "/");
 		}
 	}
-	free(camino);
 	return inodo;
 }
 
