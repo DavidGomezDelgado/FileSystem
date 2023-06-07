@@ -23,7 +23,7 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 	printf("---- fs_getattr - Path: %s\n", path);
 
 	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
-//	struct directory_entry *entry;
+
 	struct inode_fs *inode;
 	int res = 0;
 	char path_aux[70], base[70], dir[70];
@@ -32,8 +32,6 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 	
 //	strcpy(base, basename(path_aux));
 //	strcpy(dir, dirname(path_aux));
-
-
 
 	memset(stbuf, 0, sizeof(struct stat));
 	
@@ -59,11 +57,13 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 
 		// Obtenemos el inodo del archivo o directorio
 		inode = inode_search_path(path_aux, private_data);
+
 		if (inode == NULL) {
 			printf("---- fs_getattr - No entry... \"-.-\n");
 			res = -ENOENT;
 			return res;
 		}
+
 		if (inode->i_type == 'd') {
 			stbuf -> st_mode = S_IFDIR | inode->i_permisos;   // Directorio con permisos 0777
 		} else if (inode->i_type == 'f') {
@@ -81,7 +81,6 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 
 		stbuf -> st_size = inode->i_tam;
 		stbuf -> st_blocks = 8;
-
 
 	}
 	
@@ -116,7 +115,6 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 //	strcpy(base, basename(path_aux));
 //	strcpy(dir, dirname(path_aux));
 
-
 	if (strcmp(path, "/") == 0) {
 
 		// Accedemos a sus entradas y las mostramos
@@ -136,6 +134,7 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 
 	// Comprobamos si es directorio
 	} else {
+
 		// Obtenemos el inodo del archivo o directorio
 		inode = inode_search_path(path_aux, private_data);
 		
@@ -156,7 +155,9 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 					return -ENOMEM;
 				}
 				j++;
+
 			}
+
 		}
 
 	}
@@ -174,16 +175,16 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 
 static int fs_mkdir (const char *path, mode_t mode) {
 
+	printf("---- Entering fs_mkdir function...\n");
+
 	int res = 0;
 	char path_aux[70], base[70], dir[70];
 
-	printf("---- Entering fs_mkdir function...\n");
-
 	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
 	
-
 	strcpy(path_aux, path);
 
+	// Obtenemos el archivo actual y el path hasta su padre
 	strcpy(base, basename(path_aux));
 	strcpy(dir, dirname(path_aux));
 
@@ -204,16 +205,16 @@ static int fs_mkdir (const char *path, mode_t mode) {
 
 static int fs_rmdir (const char *path) {
 
-	int res = 0;
-
-	char path_aux[70], base[70], dir[70];
-
 	printf("---- Entering fs_mkdir function...\n");
+
+	int res = 0;
+	char path_aux[70], base[70], dir[70];
 
 	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
 
 	strcpy(path_aux, path);
 
+	// Obtenemos el archivo actual y el path hasta su padre
 	strcpy(base, basename(path_aux));
 	strcpy(dir, dirname(path_aux));
 	
@@ -239,23 +240,25 @@ static int fs_rmdir (const char *path) {
  ---- RENAME FUNCTION ----
  *************************/
 
-static int fs_rename (const char *oldpath, const char *newpath, unsigned int flags) {
+static int fs_rename (const char *oldpath, const char *newpath/*, unsigned int flags*/) {
+
+	printf("---- Entering fs_rename function...\n");
 
 	int res = 0;
 	struct inode_fs *inode;
 	struct directort_entry *entry;
-	char path_aux[70], base[70], dir[70];
-
-	printf("---- Entering fs_rename function...\n");
+	char newpath_aux[70], oldpath_aux[70], base[70], dir[70];
 
 	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
 
-	strcpy(path_aux, newpath);
+	strcpy(oldpath_aux, oldpath);
+	strcpy(newpath_aux, newpath);
 
-	strcpy(base, basename(path_aux));
-	strcpy(dir, dirname(path_aux));
+	// Obtenemos el archivo actual y el path hasta su padre
+	strcpy(base, basename(newpath_aux));
+	strcpy(dir, dirname(newpath_aux));
 
-	if (rename_file(oldpath, base, private_data) == -1) {
+	if (rename_file(oldpath_aux, base, private_data) == -1) {
 		return -ENOENT;
 	}
 
@@ -271,7 +274,76 @@ static int fs_rename (const char *oldpath, const char *newpath, unsigned int fla
  ***********************/
 
 //fs_open (char * path/nombrefichero,  struct fuse_file_info * fi)
+/*
+static int open (const char *path, struct fuse_file_info *fi) {
 
+	// El sistema llama a esta función cuando se abre un fichero para lectura o escritura
+
+	printf("---- Entering fs_open function...\n");
+
+	int res = 0, i, j = 0, encontrado = 0;
+	struct directory_entry *entry;
+	struct inode_fs *inode;
+	char path_aux[70], base[70], dir[70];
+
+	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
+
+	strcpy(path_aux, path);
+
+	// Obtenemos el archivo actual y el path hasta su padre
+	strcpy(base, basename(path_aux));
+	strcpy(dir, dirname(path_aux));
+
+	if (strcmp(path, "/") == 0) {
+
+		// Recorremos sus entradas buscando ficheros
+		for (i = 0; i < N_DIRECTOS && (private_data->inode[0].i_directos[i] != 0) && !encontrado; i++) {
+			entry = (struct directory_entry *) private_data->block[private_data->inode[0].i_directos[i] - private_data->superblock->reserved_block];
+
+			while (j < max_entries && entry[j].inode != NULL && !encontrado) {
+				// Comprobamos que la entrada coincida con el nombre y que sea fichero
+				if (strcmp(entry[j].name, base) == 0 && entry[j].inode->i_type == 'f') {
+					// Guardamos el índice de inodo para no tener que buscarlo en read
+					fi -> fh = entry[j].inode->i_num;
+					encontrado = 1;
+					printf("---- inodo: %d  fi -> fh: %lu\n", private_data->inode[entry[j].inode->i_num].i_num, fi -> fh);
+				}
+				j++;
+			}
+		}
+
+		if (!encontrado) {
+			printf("---- mi_open - No entry... \"-.- \n");
+			return -ENOENT;
+		}
+
+	} else {
+		// Obtenemos inodo del fichero
+		inode = inode_search_path(path_aux, private_data);
+
+		if (inode == NULL) {
+			return -ENOENT;
+		}
+
+		// Guardamos el índice de inodo para no tener que buscarlo en read
+		fi -> fh = inode->i_num;
+		printf("---- inodo: %d  fi -> fh: %lu\n", private_data->inode[inode->i_num].i_num, fi -> fh);
+
+	}
+
+
+
+	// Comprobamos si tenemos acceso a lectura y escritura
+	if ((fi -> flags & 3) != O_RDONLY) {   // los 3 lsb son los modos de open (append, read only,...)
+		return -EACCES;
+	}
+
+	printf("---- File opened successfully \\^o^/ !\n");
+
+	return res;
+
+}
+*/
 
 /***********************
  ---- READ FUNCTION ----
