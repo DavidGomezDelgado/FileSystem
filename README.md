@@ -23,7 +23,9 @@
 - Corregir control de errores en algunas fucniones (devolver -1, 1... según error).
 - Corregir funcionamiento de rename (al renombrar fichero a un nombre que ya tiene un directorio, se elimina el fichero), touch (cuando comprobamos si existe ya alguien con ese nombre, comprobar tb si es del mismo tipo).
 - Eliminar condición if(path == "/") de rm porque el raíz nunca se puede eliminar.
+- Adaptar las funciones de FUSE a las modificaciones del código de Fncionable2.0.
 - Corregir asignación de links en FUSE.
+- Corregir error de permisos en fs_open.
 
 - Deberíamos hacer "mini funciones" para compactar el código (SI HAY TIEMPO).
 
@@ -37,3 +39,4 @@
 *** DUDAS ***
 - Función modificar tamaño de fichero.
 - ¿Seteamos a 1 el índice de un bloque cuando ya no tiene entradas libres o cómo?
+- ¿Cómo funciona el manejo de permisos en funciones de FUSE como open o mknod?
