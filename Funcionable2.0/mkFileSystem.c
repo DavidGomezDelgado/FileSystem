@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 
-	strcpy(path, "../FUSE/");
+	strcpy(path, "../FUSE2/");
 	strcat(path, argv[1]);
 
 	file = open(path, O_RDWR);
@@ -73,6 +73,7 @@ int main(int argc, char *argv[]){
 		 private_data->superblock->offset_bloques = private_data->superblock->offset_inodos + (((sizeof(struct inode_fs) * private_data->superblock->num_inodes)/BLOCK_SIZE) +1)*BLOCK_SIZE;
 	 }
 
+	private_data->superblock->inodes_ocupados = 0;
 	 //movemos el puntero del fichero a donde apunta el offset
 	 unsigned long bitmap_offset = private_data->superblock->bitmapb_offset;
 	 unsigned long numb = private_data->superblock->num_blocks/8, numi = private_data->superblock->num_inodes/8;
@@ -85,7 +86,7 @@ int main(int argc, char *argv[]){
 	 private_data->inode_bitmap.size = numi;
 
 
- 	  private_data->inode = (struct inode_fs*) mmap(NULL,(sizeof(struct inode_fs) * private_data->superblock->num_inodes), PROT_WRITE|PROT_READ, MAP_SHARED,file, private_data->superblock->offset_inodos); // @suppress("Field cannot be resolved")
+ 	 private_data->inode = (struct inode_fs*) mmap(NULL,(sizeof(struct inode_fs) * private_data->superblock->num_inodes), PROT_WRITE|PROT_READ, MAP_SHARED,file, private_data->superblock->offset_inodos); // @suppress("Field cannot be resolved")
 	 private_data->block = (block_t*) mmap(NULL,statbuf.st_size-private_data->superblock->offset_bloques, PROT_WRITE|PROT_READ, MAP_SHARED,file, private_data->superblock->offset_bloques);
 
 	printf("Todo guardado\n");
@@ -116,22 +117,23 @@ int main(int argc, char *argv[]){
 			 i++;
 		 }
 
-		 struct inode_fs *root = create_root(private_data);
+		 create_root(private_data);
+		 struct inode_fs *root = &private_data->inode[0];
 	//**FIN DE PRUEBAS**//
 
 
 	//**BORRAR SOLO SON PRUEBAS**//
 	file = open("filesystem.txt", O_CREAT | O_RDWR, 0664);
-	fflush(stdout);
+	/*fflush(stdout);
 	for(i = 0; i < private_data->block_bitmap.size; i++){
 		printf("%#x\n", private_data->block_bitmap.array[i]);
 	}
-	printf("\n%d \n, %c,\n %d\n", private_data->inode->i_num, private_data->inode->i_type, private_data->inode->i_tam);
+	printf("\n%ld \n, %c,\n %d\n", private_data->inode->i_num, private_data->inode->i_type, private_data->inode->i_tam);
 	fflush(stdout);
 	struct directory_entry *aux = (struct directory_entry*) private_data->block[private_data->inode[0].i_directos[0] - private_data->superblock->reserved_block];
 	for(i = 0; i < 2; i++){
-		printf("%s %d\n", aux[i].name, aux[i].inode->i_num);
-	}
+		printf("%s %ld\n", aux[i].name, aux[i].inode->i_num);
+	}*/
 
 //	private_data private;
 //
@@ -217,7 +219,7 @@ int main(int argc, char *argv[]){
 
 	printf("Compruebo si se guardan bien los inodos en private_data:\n");
 	for(i = 0; i < 20; i++) {
-		printf("id: %d ", private_data->inode[i].i_num);
+		printf("id: %ld ", private_data->inode[i].i_num);
 	}
 	printf("Se guardan bien :D\n");
 

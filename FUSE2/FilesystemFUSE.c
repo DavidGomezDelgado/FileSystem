@@ -116,13 +116,31 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 //	strcpy(dir, dirname(path_aux));
 
 	if (strcmp(path, "/") == 0) {
-
+		
 		// Accedemos a sus entradas y las mostramos
-		for (i = 0; i < N_DIRECTOS && (private_data->inode[0].i_directos[i] != 0); i++) {
+		entry = (struct directory_entry *) private_data->block[private_data->inode[0].i_directos[0] - private_data->superblock->reserved_block];
+
+		j = 2;
+		if (filler(buf, entry[0].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
+			return -ENOMEM;
+		}
+		if (filler(buf, entry[1].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
+			return -ENOMEM;
+		}
+		while (j < max_entries && entry[j].inode <= private_data->superblock->inodes_ocupados && entry[j].inode > 0) {
+			// Indicamos qué entradas deben estar en el path 
+			if (filler(buf, entry[j].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
+				break;
+				return -ENOMEM;
+			}
+			j++;
+		}
+		
+		for (i = 1; i < N_DIRECTOS && (private_data->inode[0].i_directos[i] != 0); i++) {
 			entry = (struct directory_entry *) private_data->block[private_data->inode[0].i_directos[i] - private_data->superblock->reserved_block];
 
 			j = 0;
-			while (j < max_entries && entry[j].inode != NULL) {
+			while (j < max_entries && entry[j].inode <= private_data->superblock->inodes_ocupados && entry[j].inode > 0) {
 				// Indicamos qué entradas deben estar en el path 
 				if (filler(buf, entry[j].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
 					break;
@@ -143,13 +161,31 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 			res = -ENOENT;
 			return res;
 		}
+		entry = (struct directory_entry *) private_data->block[private_data->inode[inode->i_num].i_directos[0] - private_data->superblock->reserved_block];
+
+		j = 2;
+		if (filler(buf, entry[0].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
+			return -ENOMEM;
+		}
+		if (filler(buf, entry[1].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
+			return -ENOMEM;
+		}
+		while (j < max_entries && entry[j].inode <= private_data->superblock->inodes_ocupados && entry[j].inode > 0) {
+			// Indicamos qué entradas deben estar en el path 
+			if (filler(buf, entry[j].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
+				break;
+				return -ENOMEM;
+			}
+			j++;
+
+		}
 
 		// Accedemos a sus entradas y las mostramos
-		for (i = 0; i < N_DIRECTOS && (private_data->inode[inode->i_num].i_directos[i] != 0); i++) {
+		for (i = 1; i < N_DIRECTOS && (private_data->inode[inode->i_num].i_directos[i] != 0); i++) {
 			entry = (struct directory_entry *) private_data->block[private_data->inode[inode->i_num].i_directos[i] - private_data->superblock->reserved_block];
 
 			j = 0;
-			while (j < max_entries && entry[j].inode != NULL) {
+			while (j < max_entries && entry[j].inode <= private_data->superblock->inodes_ocupados && entry[j].inode >= 0) {
 				// Indicamos qué entradas deben estar en el path 
 				if (filler(buf, entry[j].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
 					break;
@@ -166,6 +202,7 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 	printf("---- Directory read successfully \\^o^/ !\n");
 
 	return res;
+
 
 }
 
@@ -297,11 +334,11 @@ static int fs_open (const char *path, struct fuse_file_info *fi) {
 	strcpy(dir, dirname(path_aux));
 
 	// Comprobamos si podemos crearlo
-	if ((fi -> flags & 3) == O_RDWR | O_CREAT) {   // O_CREAT -> Si no existe lo crea
+	/*if ((fi -> flags & 3) == O_RDWR | O_CREAT) {   // O_CREAT -> Si no existe lo crea
 		if (touch(base, dir, private_data) == -1) {  // Pero ya comprobamos si existe en touch (?)
 			return -EEXIST;
 		}
-	}
+	}*/
 
 	// Una vez creado obtenemos inodo del fichero
 	inode = inode_search_path(path_aux2, private_data);
@@ -311,7 +348,7 @@ static int fs_open (const char *path, struct fuse_file_info *fi) {
 	} else {
 		// Guardamos el índice de inodo para no tener que buscarlo en read
 		fi -> fh = private_data->inode[inode->i_num].i_num;
-		printf("---- inodo: %d  fi -> fh: %lu\n", private_data->inode[inode->i_num].i_num, fi -> fh);
+		printf("---- inodo: %ld  fi -> fh: %lu\n", private_data->inode[inode->i_num].i_num, fi -> fh);
 	}
 
 	// Comprobamos si tenemos acceso a lectura y escritura
@@ -399,9 +436,6 @@ int main (int argc, char *argv[]) {
 	private_data -> st_atime = fileStat.st_atime;
 	private_data -> st_ctime = fileStat.st_ctime;
 	private_data -> st_mtime = fileStat.st_mtime;
-	
-	struct inode_fs *inode = &private_data->inode[3];
-	printf("%d, %c", inode->i_num, inode->i_type);
 	
 	close(file);
 	printf("Aqui termina\n");
