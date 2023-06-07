@@ -17,22 +17,23 @@
 - Crear hardlinks y softlinks (OPCIONAL).
 
 *** TODO ***
-- Modificar manejo de los bitmaps -> no accedemos a través de memoria, sino a través del fichero
-- ¿Continuar con _inode_search()?
-- Gestionar ficheros y directorios a partir de un path distinto al actual (SI HAY TIEMPO).
+- Control de bloques e inodos libres.
+- Añadir atributo i_blocks (nº de bloques que direcciona) a estructura inode_fs.
+
+- Corregir control de errores en algunas fucniones (devolver -1, 1... según error).
+- Corregir funcionamiento de rename (al renombrar fichero a un nombre que ya tiene un directorio, se elimina el fichero), touch (cuando comprobamos si existe ya alguien con ese nombre, comprobar tb si es del mismo tipo).
+- Eliminar condición if(path == "/") de rm porque el raíz nunca se puede eliminar.
+- Corregir asignación de links en FUSE.
+
 - Deberíamos hacer "mini funciones" para compactar el código (SI HAY TIEMPO).
 
 *** ANOTACIONES ***
 - En nuestro filesystem perdemos como mucho 7 bloques.
-- Tenemos un Makefile en /Funcionable para mkFilesystem.c y la imagen.
-- Tenemos otro Makefile en /FUSE para FileSystemFUSE.c.
-- Compilamos y ejecutamos el mkFilesystem desde /Funcionable y creamos la imagen desde /Funcionable (se crea en /FUSE).
-- Compilamos y ejecutamos el FileSystemFUSE desde /FUSE.
+- Tenemos un Makefile en /Funcionable2.0 para mkFilesystem.c y la imagen.
+- Tenemos otro Makefile en /FUSE2 para FileSystemFUSE.c.
+- Compilamos y ejecutamos el mkFilesystem desde /Funcionable2.0 y creamos la imagen desde /Funcionable (se crea en /FUSE2).
+- Compilamos y ejecutamos el FileSystemFUSE desde /FUSE2.
 
 *** DUDAS ***
 - Función modificar tamaño de fichero.
-- ¿Hacemos malloc para myfilesystem?
-- ¿Cuánto espacio mapeamos para almacenar todos los bloques?
-- ¿Un bloque de entradas tiene 128 entradas?
-- ¿Distintos punteros pueden acceder al mismo bloque? -> Ya que un bloque de entradas suponemos tiene 128 entradas
-- ¿Seteamos a 1 el índice de un bloque cuando ya no tiene entradas libres o c?
+- ¿Seteamos a 1 el índice de un bloque cuando ya no tiene entradas libres o cómo?
