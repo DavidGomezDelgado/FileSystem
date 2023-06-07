@@ -213,7 +213,7 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 
 static int fs_mkdir (const char *path, mode_t mode) {
 
-	printf("---- Entering fs_mkdir function...\n");
+	printf("\n---- Entering fs_mkdir function...\n");
 
 	int res = 0;
 	char path_aux[70], base[70], dir[70];
@@ -243,7 +243,7 @@ static int fs_mkdir (const char *path, mode_t mode) {
 
 static int fs_rmdir (const char *path) {
 
-	printf("---- Entering fs_mkdir function...\n");
+	printf("\n---- Entering fs_mkdir function...\n");
 
 	int res = 0;
 	char path_aux[70], base[70], dir[70];
@@ -270,17 +270,12 @@ static int fs_rmdir (const char *path) {
 
 
 /*************************
- ---- UNLINK FUNCTION ----
- *************************/
-
-
-/*************************
  ---- RENAME FUNCTION ----
  *************************/
 
 static int fs_rename (const char *oldpath, const char *newpath/*, unsigned int flags*/) {
 
-	printf("---- Entering fs_rename function...\n");
+	printf("\n---- Entering fs_rename function...\n");
 
 	int res = 0;
 	struct inode_fs *inode;
@@ -311,14 +306,12 @@ static int fs_rename (const char *oldpath, const char *newpath/*, unsigned int f
  ---- OPEN FUNCTION ----
  ***********************/
 
-//fs_open (char * path/nombrefichero,  struct fuse_file_info * fi)
-
 static int fs_open (const char *path, struct fuse_file_info *fi) {
 
 	// El sistema llama a esta función cuando se abre un fichero para lectura o escritura
 	// CAUTION !! NO CONTROLAMOS SI HAY UN FICHERO Y UN DIRECTORIO CON EL MISMO NOMBRE
 
-	printf("---- Entering fs_open function...\n");
+	printf("\n---- Entering fs_open function...\n");
 
 	int res = 0, i, j = 0;
 	struct directory_entry *entry;
@@ -328,17 +321,16 @@ static int fs_open (const char *path, struct fuse_file_info *fi) {
 	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
 
 	strcpy(path_aux, path);
+	strcpy(path_aux2, path);
 
 	// Obtenemos el archivo actual y el path hasta su padre
 	strcpy(base, basename(path_aux));
 	strcpy(dir, dirname(path_aux));
 
 	// Comprobamos si podemos crearlo
-	/*if ((fi -> flags & 3) == O_RDWR | O_CREAT) {   // O_CREAT -> Si no existe lo crea
-		if (touch(base, dir, private_data) == -1) {  // Pero ya comprobamos si existe en touch (?)
-			return -EEXIST;
-		}
-	}*/
+	//if ((fi -> flags & 3) == O_RDWR | O_CREAT) {   // O_CREAT -> Si no existe lo crea
+	// ¿Podemos crear el fichero aquí? -> se hace en fs_mknod
+	//}
 
 	// Una vez creado obtenemos inodo del fichero
 	inode = inode_search_path(path_aux2, private_data);
@@ -348,8 +340,10 @@ static int fs_open (const char *path, struct fuse_file_info *fi) {
 	} else {
 		// Guardamos el índice de inodo para no tener que buscarlo en read
 		fi -> fh = private_data->inode[inode->i_num].i_num;
-		printf("---- inodo: %ld  fi -> fh: %lu\n", private_data->inode[inode->i_num].i_num, fi -> fh);
+		printf("--fs_open inodo: %ld  fi -> fh: %lu\n", private_data->inode[inode->i_num].i_num, fi -> fh);
 	}
+	
+	printf("--fs_open flags: %d O_RDONLY: %d O_WRONLY: %d O_RDWR: %d O_CREAT: %d\n", fi->flags & 3, O_RDONLY, O_WRONLY, O_RDWR, O_CREAT);
 
 	// Comprobamos si tenemos acceso a lectura y escritura
 	if ((fi -> flags & 3) != O_RDWR) {   // los 3 lsb son los modos de open (append, read only,...)
@@ -359,6 +353,86 @@ static int fs_open (const char *path, struct fuse_file_info *fi) {
 	printf("---- File opened successfully \\^o^/ !\n");
 
 	return res;
+
+}
+
+
+/************************
+ ---- MKNOD FUNCTION ----
+ ************************/
+
+static int fs_mknod (const char *path, mode_t mode, dev_t dev) {
+
+	printf("\n---- Entering fs_mknod function...\n");
+
+	int res = 0;
+	struct inode_fs *inode;
+
+	char path_aux[70], path_aux2[70], base[70], dir[70];
+
+	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
+
+	strcpy(path_aux, path);
+	strcpy(path_aux2, path);
+
+	// Obtenemos el archivo actual y el path hasta su padre
+	strcpy(base, basename(path_aux));
+	strcpy(dir, dirname(path_aux));
+
+	printf("-- fs_mknod mode: %d\n", mode & 3);
+
+	// Comprobamos si podemos crearlo
+	//if ((fi -> flags & 3) == O_RDWR | O_CREAT) {   // O_CREAT -> Si no existe lo crea
+	if (touch(base, dir, private_data) == -1) {  // Pero ya comprobamos si existe en touch (?)
+		printf("--fs_mknod YA EXISTE");
+		return -EEXIST;
+	}
+
+	inode = inode_search_path(path_aux2, private_data);
+
+	printf("-- fs_mknod tipo: %c\n", inode->i_type);
+
+	printf("---- File created successfully \\^o^/ !\n");
+
+	return res;
+
+}
+
+
+/*************************
+ ---- UNLINK FUNCTION ----
+ *************************/
+
+static int fs_unlink (const char *path) {
+
+	printf("\n---- Entering fs_unlink function...\n");
+
+	int res = 0;
+	struct inode_fs *inode;
+	char path_aux[70], path_aux2[70], base[70], dir[70];
+
+	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
+
+	strcpy(path_aux, path);
+	strcpy(path_aux2, path);
+
+	// Obtenemos el archivo actual y el path hasta su padre
+	strcpy(base, basename(path_aux));
+	strcpy(dir, dirname(path_aux));
+
+	inode = inode_search_path(path_aux2, private_data);
+
+	printf("-- fs_mknod tipo: %c\n", inode->i_type);
+
+	if (rm(path_aux2, private_data) == -1) {
+		return -ENOENT;
+	} else if (rm(path_aux2, private_data) == 1) {
+		return -EISDIR;
+	}
+
+	printf("---- File deleted successfully \\^o^/ !\n");
+
+	return 0;
 
 }
 
@@ -378,14 +452,16 @@ static int fs_open (const char *path, struct fuse_file_info *fi) {
  *************************/
 
 static struct fuse_operations basic_oper = {
-	.getattr	= fs_getattr,   
+	.getattr	= fs_getattr,
 	.readdir	= fs_readdir,
 	.open		= fs_open,
+	//.release	= fs_release,
 	//.read		= fs_read,
 	//.write	= fs_write,
 	.rmdir		= fs_rmdir,
 	.mkdir		= fs_mkdir,
-	//.unlink		= fs_unlink,
+	.mknod		= fs_mknod,
+	.unlink		= fs_unlink,
 	.rename		= fs_rename,
 };
 
@@ -404,7 +480,7 @@ int main (int argc, char *argv[]) {
 	
 	// NOS DA ERROR INVALID ARGUMENT: punto_montaje
 	printf("%s\n", argv[1]);
-	file = open(argv[1], O_RDWR /*0666*/);
+	file = open(argv[argc-2], O_RDWR /*0666*/);
 	//file = open("filesystem.img", O_RDWR, 0666);
 	if (file == -1) {
 		perror("Error al abrir el archivo");

@@ -98,8 +98,9 @@ void remove_dentry (char *nombre, struct inode_fs *i_directorio, filesystem_t *p
 
 }
 
-void rm (char *path, filesystem_t *private_data) {
+int rm (char *path, filesystem_t *private_data) {
 
+	int res = 0;
 	struct inode_fs *i_directory;
 	struct inode_fs *inode;
 	char path_aux[70], base[70], dir[70];
@@ -121,9 +122,11 @@ void rm (char *path, filesystem_t *private_data) {
 	}
 
 	if (inode == NULL) {
-		printf("No existe el fichero");
+		// printf("No existe el fichero\n");
+		return -1;
 	} else if (inode->i_type != 'f') {
-		printf("No es un fichero\n");
+		// printf("No es un fichero\n");
+		return 1;
 	} else {
 		// Eliminamos la entrada del directorio actual a partir de su nombre
 		remove_dentry(base, i_directory, private_data);
@@ -134,6 +137,8 @@ void rm (char *path, filesystem_t *private_data) {
 
 
 	}
+	
+	return res;
 
 }
 

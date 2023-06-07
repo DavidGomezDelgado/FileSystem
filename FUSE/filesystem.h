@@ -106,7 +106,7 @@ int rename_file(char *, char *, filesystem_t *);
 struct directory_entry *search_last_entry (struct inode_fs *, filesystem_t *);  // CAUTION !!!
 void remove_dentry (char *, struct inode_fs *, filesystem_t *);
 void remove_inode (struct inode_fs *, filesystem_t *);
-void rm (char *, filesystem_t *);
+int rm (char *, filesystem_t *);
 
 // file_operations.c
 void file_edit(char *, char *, filesystem_t *);
