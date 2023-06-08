@@ -125,7 +125,7 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 		if (filler(buf, entry[1].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
 			return -ENOMEM;
 		}
-		while (j < max_entries && entry[j].inode <= private_data->superblock->inodes_ocupados && entry[j].inode > 0) {
+		while (j < max_entries && entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode > 0) {
 			// Indicamos qué entradas deben estar en el path 
 			if (filler(buf, entry[j].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
 				break;
@@ -138,7 +138,7 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 			entry = (struct directory_entry *) private_data->block[private_data->inode[0].i_directos[i] - private_data->superblock->reserved_block];
 
 			j = 0;
-			while (j < max_entries && entry[j].inode <= private_data->superblock->inodes_ocupados && entry[j].inode > 0) {
+			while (j < max_entries && entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode > 0) {
 				// Indicamos qué entradas deben estar en el path 
 				if (filler(buf, entry[j].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
 					break;
@@ -168,7 +168,7 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 		if (filler(buf, entry[1].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
 			return -ENOMEM;
 		}
-		while (j < max_entries && entry[j].inode <= private_data->superblock->inodes_ocupados && entry[j].inode > 0) {
+		while (j < max_entries && entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode > 0) {
 			// Indicamos qué entradas deben estar en el path 
 			if (filler(buf, entry[j].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
 				break;
@@ -183,7 +183,7 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 			entry = (struct directory_entry *) private_data->block[private_data->inode[inode->i_num].i_directos[i] - private_data->superblock->reserved_block];
 
 			j = 0;
-			while (j < max_entries && entry[j].inode <= private_data->superblock->inodes_ocupados && entry[j].inode >= 0) {
+			while (j < max_entries && entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode >= 0) {
 				// Indicamos qué entradas deben estar en el path 
 				if (filler(buf, entry[j].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
 					break;

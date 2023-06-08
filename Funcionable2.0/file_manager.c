@@ -15,7 +15,7 @@ void update_entry (char *name, struct inode_fs *hijo, struct inode_fs *padre, fi
 	// Recorremos punteros directos del padre
 	//Nos saltamos . y .. ya que puede que algunos sea el inodo 0 que es el raiz
 	entry = (struct directory_entry *) private_data->block[padre->i_directos[0] - private_data->superblock->reserved_block];
-	for (j = 2; j < 128 && !encontrado; j++) {
+	for (j = 2; j < max_entries && !encontrado; j++) {
 		// Si encontramos entrada libre, la actualizamos
 		if(entry[j].inode == 0) {
 			strcpy(entry[j].name, name);
@@ -26,8 +26,8 @@ void update_entry (char *name, struct inode_fs *hijo, struct inode_fs *padre, fi
 	for (i = 1; i < N_DIRECTOS && (padre->i_directos[i] != 0) && !encontrado; i++) {
 		entry = (struct directory_entry *) private_data->block[padre->i_directos[i] - private_data->superblock->reserved_block];
 
-		// Recorremos las 128 entradas
-		for (j = 0; j < 128 && !encontrado; j++) {
+		// Recorremos las entradas
+		for (j = 0; j < max_entries && !encontrado; j++) {
 
 			// Si encontramos entrada libre, la actualizamos
 			if(entry[j].inode == 0) {
@@ -130,7 +130,7 @@ int rename_file (char *path, char *new_name, filesystem_t *private_data) {
 		for (i = 0; i < N_DIRECTOS && (i_directory->i_directos[i] != 0) && !encontrado; i++) {
 			entry = (struct directory_entry *) private_data->block[i_directory->i_directos[i] - private_data->superblock->reserved_block];
 
-			for (j = 0; j < max_entries && (entry[j].inode <= private_data->superblock->inodes_ocupados && entry[j].inode >= 0) && !encontrado; j++) {
+			for (j = 0; j < max_entries && (entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode >= 0) && !encontrado; j++) {
 				// Comprobamos el nombre
 				if (strcmp(entry[j].name, base) == 0) {
 					strcpy(entry[j].name, new_name);
@@ -156,7 +156,7 @@ void clean_inode (struct inode_fs *inodo, filesystem_t *private_data) {
 		byte = inodo->i_directos[i] / 8;
 		bit = 7 - (inodo->i_directos[i] % 8);
 		private_data->block_bitmap.array[byte] = private_data->block_bitmap.array[byte] & ~ (1 << bit);
-		memset(private_data->block[inodo->i_directos[i] - private_data->superblock->reserved_block], '\0', BLOCK_SIZE);
+		memset(private_data->block[inodo->i_directos[i] - private_data->superblock->reserved_block], 0, BLOCK_SIZE);
 		// Ahora no apunta a nada
 		inodo->i_directos[i] = 0;
 	}
