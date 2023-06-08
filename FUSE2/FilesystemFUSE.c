@@ -481,10 +481,98 @@ static int fs_unlink (const char *path) {
  ---- READ FUNCTION ----
  ***********************/
  
+// size: tamaño en bytes a leer,  offset: posición del fichero desde la que leer
+static int fs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+
+	printf("\n---- Entering fs_write function...\n");
+
+	struct inode_fs *inode;
+	struct inode_fs *i_directory;   // Porque nuestro read_file no se maneja por un path --> CAMBIAR
+	char path_aux[70], path_aux2[70], base[70], dir[70];
+	char *content;
+	int len;
+
+	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
+
+	strcpy(path_aux, path);
+	strcpy(path_aux2, path);
+
+	// Obtenemos el archivo actual y el path hasta su padre
+	strcpy(base, basename(path_aux));
+	strcpy(dir, dirname(path_aux));
+
+	inode = inode_search_path(path_aux2, private_data);
+	i_directory = inode_search_path(dir, private_data);
+
+	// PROBAR CON fi->fh  (tiene que ser > 0)
+	if (inode == NULL) {
+		return -ENOENT;
+	} else if (inode->i_type == 'd') {
+		return -EISDIR;
+	} else {
+		content = read_file(base, i_directory, private_data);
+		len = strlen(content);
+		printf("--fs_read contenido fichero: %s\n", content);
+
+		// Actualizamos bytes leídos
+		if (offset < len) {
+			if (offset + size > len) {
+				size = len - offset;
+			}
+
+			memcpy(buf, content + offset, size);   // estamos a nvl de aplicación, no usamos copy_to_user
+
+			printf("--fs_read buffer a enviar: %s\n", buf);
+		} else {
+			size = 0;
+		}
+	}
+
+	return size;
+
+}
+ 
 
 /************************
  ---- WRITE FUNCTION ----
  ************************/
+ 
+// size: tamaño en bytes a escribir,  offset: posición del fichero en la que escribir
+static int fs_write (const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+
+	printf("\n---- Entering fs_write function...\n");
+
+	struct inode_fs *inode;
+	char path_aux[70], path_aux2[70], base[70], dir[70], content[size];
+
+	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
+
+	strcpy(path_aux, path);
+	strcpy(path_aux2, path);
+
+	// Obtenemos el archivo actual y el path hasta su padre
+	strcpy(base, basename(path_aux));
+	strcpy(dir, dirname(path_aux));
+
+	printf("--fs_write buffer a escibir: %s\n", buf);
+
+	inode = inode_search_path(path_aux2, private_data);
+
+	// PROBAR CON fi->fh  (tiene que ser > 0)
+	if (inode == NULL) {
+		return -ENOENT;
+	} else if (inode->i_type == 'd') {
+		return -EISDIR;
+	} else {
+		memcpy(content, buf, size);
+		file_edit(content, path_aux2, private_data);
+	}
+
+	printf("---- File wrote successfully \\^o^/ !\n");
+
+	return size;
+
+}
  
 
 /*************************
@@ -496,8 +584,8 @@ static struct fuse_operations basic_oper = {
 	.readdir	= fs_readdir,
 	.open		= fs_open,
 	//.release	= fs_release,
-	//.read		= fs_read,
-	//.write	= fs_write,
+	.read		= fs_read,
+	.write		= fs_write,
 	.rmdir		= fs_rmdir,
 	.mkdir		= fs_mkdir,
 	//.mknod		= fs_mknod,
