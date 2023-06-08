@@ -1,5 +1,5 @@
 montaje=punto_montaje
-fichero=filesystem.img
+fichero=PorygonEXT.img
 
 fuse_flags = -D_FILE_OFFSET_BITS=64 -lfuse -pthread
 

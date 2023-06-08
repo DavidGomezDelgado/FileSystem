@@ -23,10 +23,10 @@ $(OBJECT): $(SOURCES)
 	$(CC) $(CFLAGS) $(SOURCES) -o $(TARGET)
 	
 image:
-	dd if=/dev/zero of=../FUSE2/filesystem.img bs=4096 count=$(COUNT)
+	dd if=/dev/zero of=../FUSE2/PorygonEXT.img bs=4096 count=$(COUNT)
 
 clean:
-	rm -f *.o $(OBJECT) $(TARGET) ../FUSE2/filesystem.img
+	rm -f *.o $(OBJECT) $(TARGET) ../FUSE2/PorygonEXT.img
 	
 .PHONY: image clean
 
