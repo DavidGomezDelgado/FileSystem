@@ -40,12 +40,13 @@ int make_dir (char *name, char *path, filesystem_t *private_data) {
 
 			// Modificamos entrada .. para que apunte a su padre
 			entry = (struct directory_entry *) private_data->block[inode->i_directos[0] - private_data->superblock->reserved_block];
-			for (i = 0; i < 128 && (entry[i].inode <= private_data->superblock->inodes_ocupados && entry[i].inode >= 0) && !encontrado; i++) {
+			/*for (i = 0; i < max_entries && (entry[i].inode <= private_data->superblock->inodes_ocupados && entry[i].inode >= 0) && !encontrado; i++) {
 				if (strcmp(entry[i].name, "..") == 0) {
 					entry[i].inode = i_directory->i_num;
 					encontrado = 1;
 				}
-			}
+			}*/
+			entry[1].inode = i_directory->i_num;
 
 		} else {
 			//printf("Ya existe el fichero o directorio\n");

@@ -51,8 +51,6 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 		stbuf -> st_size = private_data->inode[0].i_tam;
 		stbuf -> st_blocks = 8;
 
-		printf("---- Attributes set successfully \\^o^/ !\n");
-
 	} else {
 
 		// Obtenemos el inodo del archivo o directorio
@@ -555,6 +553,13 @@ int main (int argc, char *argv[]) {
 	private_data -> st_atime = fileStat.st_atime;
 	private_data -> st_ctime = fileStat.st_ctime;
 	private_data -> st_mtime = fileStat.st_mtime;
+	
+	struct inode_fs *root = &private_data->inode[0];
+	struct directory_entry *entries = (struct directory_entry *) private_data->block[root->i_directos[0] - private_data->superblock->reserved_block];
+	int i;
+	for(i = 0; i < 15; i++){
+		printf("%s %ld\n", entries[i].name,entries[i].inode);
+	}
 	
 	close(file);
 	printf("Aqui termina\n");
