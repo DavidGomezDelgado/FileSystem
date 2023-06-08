@@ -376,8 +376,9 @@ static int fs_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
 
 	// Comprobamos si podemos crearlo
 	if (touch(base, dir, private_data) == -1) {  // Pero ya comprobamos si existe en touch (?)
-		printf("--fs_mknod YA EXISTE");
-		return -EEXIST;
+		printf("--fs_create YA EXISTE");
+		errno = EEXIST;
+		return -1;
 	}
 
 	inode = inode_search_path(path_aux2, private_data);
@@ -607,7 +608,6 @@ static struct fuse_operations basic_oper = {
  **********************/
 
 int main (int argc, char *argv[]) {
-	printf("Aqui empieza\n");
 	filesystem_t *private_data = malloc(sizeof(filesystem_t));
 	int file;
 	struct stat fileStat;
@@ -634,6 +634,10 @@ int main (int argc, char *argv[]) {
 	argc--;
 	// Inicializamos estructura	
 	private_data->superblock = mmap(NULL, sizeof(struct superblock_fs), PROT_WRITE|PROT_READ, MAP_SHARED,file, 0);
+	if(private_data->superblock->magic_number != MAGIC_N){
+		printf("Fichero formateado erroneo\n");
+		return -1;
+	}
 	private_data->block_bitmap.size = private_data->superblock->num_blocks/8;
 	private_data->block_bitmap.array = mmap(NULL, private_data->block_bitmap.size, PROT_WRITE|PROT_READ, MAP_SHARED,file, private_data->superblock->bitmapb_offset);
 	private_data->inode_bitmap.size = private_data->superblock->num_inodes/8;
@@ -641,7 +645,6 @@ int main (int argc, char *argv[]) {
 
 	private_data->inode = mmap(NULL,private_data->superblock->bitmapi_offset - private_data->superblock->bitmapb_offset, PROT_WRITE|PROT_READ, MAP_SHARED,file, private_data->superblock->offset_inodos);
 	private_data->block = (block_t*) mmap(NULL,fileStat.st_size-private_data->superblock->offset_bloques, PROT_WRITE|PROT_READ, MAP_SHARED,file, private_data->superblock->offset_bloques);
-	//private_data->fd = file;
 	
 	private_data -> st_uid = fileStat.st_uid;
 	private_data -> st_gid = fileStat.st_gid;
@@ -650,16 +653,9 @@ int main (int argc, char *argv[]) {
 	private_data -> st_ctime = fileStat.st_ctime;
 	private_data -> st_mtime = fileStat.st_mtime;
 	
-	// Prueba a mostrar contenido de root
-	struct inode_fs *root = &private_data->inode[0];
-	struct directory_entry *entries = (struct directory_entry *) private_data->block[root->i_directos[0] - private_data->superblock->reserved_block];
-	int i;
-	for(i = 0; i < 15; i++){
-		printf("%s %ld\n", entries[i].name,entries[i].inode);
-	}
+
 	
 	close(file);
-	printf("Aqui termina\n");
 	return fuse_main(argc, argv, &basic_oper, private_data);
 
 }

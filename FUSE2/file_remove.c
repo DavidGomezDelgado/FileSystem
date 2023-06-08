@@ -26,7 +26,7 @@ struct directory_entry *search_last_entry (struct inode_fs *i_directorio, filesy
 	
 	entry = (struct directory_entry *) private_data->block[i_directorio->i_directos[0] - private_data->superblock->reserved_block];
 	// Recorremos las entradas, nos saltamos . .. 
-	for (j = 2; j < max_entries-1 && (entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode > 0); j++) {
+	for (j = 2; j < max_entries-1 && (entry[j].inode <= private_data->superblock->num_inodes && entry[j].inode > 0); j++) {
 
 		// Comprobamos la siguiente entrada
 		if (entry[j+1].inode == 0) {
@@ -41,7 +41,7 @@ struct directory_entry *search_last_entry (struct inode_fs *i_directorio, filesy
 		entry = (struct directory_entry *) private_data->block[i_directorio->i_directos[i] - private_data->superblock->reserved_block];
 
 		// Recorremos las entradas
-		for (j = 0; j < max_entries && (entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode > 0); j++) {
+		for (j = 0; j < max_entries && (entry[j].inode <= private_data->superblock->num_inodes && entry[j].inode > 0); j++) {
 			//printf("search_last_entry -> entrada %d: %s  entrada %d: %s\n", j, entry[j].name, j+1, entry[j+1].name);
 
 			// Comprobamos la siguiente entrada
@@ -78,7 +78,7 @@ void remove_dentry (char *nombre, struct inode_fs *i_directorio, filesystem_t *p
 	// Obtenemos entradas
 	entry = (struct directory_entry *) private_data->block[i_directorio->i_directos[0] - private_data->superblock->reserved_block];
 	// Recorremos las entradas buscando la que queremos eliminar
-	for (j = 2; j < max_entries && (entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode > 0) && !encontrado; j++) {
+	for (j = 2; j < max_entries && (entry[j].inode <= private_data->superblock->num_inodes && entry[j].inode > 0) && !encontrado; j++) {
 		//printf("remove_dentry -> entrada: %s\n", entry[j].name);
 
 		if (strcmp(entry[j].name, nombre) == 0) {
@@ -111,7 +111,7 @@ void remove_dentry (char *nombre, struct inode_fs *i_directorio, filesystem_t *p
 		entry = (struct directory_entry *) private_data->block[i_directorio->i_directos[i] - private_data->superblock->reserved_block];
 
 		// Recorremos las entradas buscando la que queremos eliminar
-		for (j = 0; j < max_entries && (entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode > 0) && !encontrado; j++) {
+		for (j = 0; j < max_entries && (entry[j].inode <= private_data->superblock->num_inodes && entry[j].inode > 0) && !encontrado; j++) {
 			//printf("remove_dentry -> entrada: %s\n", entry[j].name);
 
 			if (strcmp(entry[j].name, nombre) == 0) {

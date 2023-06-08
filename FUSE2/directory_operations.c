@@ -29,7 +29,7 @@ void read_directory (char *path, filesystem_t *private_data) {
 		// Recorremos entradas
 		printf(" tipo: %c  permisos: %d  id: %ld  tam: %d  links: %d  nombre: %s\n", private_data->inode[entry[0].inode].i_type, private_data->inode[entry[0].inode].i_permisos, private_data->inode[entry[0].inode].i_num, private_data->inode[entry[0].inode].i_tam, private_data->inode[entry[0].inode].i_links, entry[0].name);
 		printf(" tipo: %c  permisos: %d  id: %ld  tam: %d  links: %d  nombre: %s\n", private_data->inode[entry[1].inode].i_type, private_data->inode[entry[1].inode].i_permisos, private_data->inode[entry[1].inode].i_num, private_data->inode[entry[1].inode].i_tam, private_data->inode[entry[1].inode].i_links, entry[1].name);
-		for (j = 2; j < 128 && (entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode > 0) && !encontrado; j++) {
+		for (j = 2; j < 128 && (entry[j].inode <= private_data->superblock->num_inodes && entry[j].inode > 0) && !encontrado; j++) {
 			printf(" tipo: %c  permisos: %d  id: %ld  tam: %d  links: %d  nombre: %s\n", private_data->inode[entry[j].inode].i_type, private_data->inode[entry[j].inode].i_permisos, private_data->inode[entry[j].inode].i_num, private_data->inode[entry[j].inode].i_tam, private_data->inode[entry[j].inode].i_links, entry[j].name);
 		}
 
@@ -42,7 +42,7 @@ void read_directory (char *path, filesystem_t *private_data) {
 			printf("Contenido del directorio:\n");
 
 			// Recorremos entradas
-			for (j = 0; j < 128 && (entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode > 0) && !encontrado; j++) {
+			for (j = 0; j < 128 && (entry[j].inode <= private_data->superblock->num_inodes && entry[j].inode > 0) && !encontrado; j++) {
 				printf(" tipo: %c  permisos: %d  id: %ld  tam: %d  links: %d  nombre: %s\n", private_data->inode[entry[j].inode].i_type, private_data->inode[entry[j].inode].i_permisos, private_data->inode[entry[j].inode].i_num, private_data->inode[entry[j].inode].i_tam, private_data->inode[entry[j].inode].i_links, entry[j].name);
 			}
 

@@ -4,8 +4,8 @@
 #include <string.h>
 #include "filesystem.h"
 
-/* Muestra el contenido del directorio "nombre" con inodo "directory" */
-void read_directory (/*char *name,*/ char *path, /*struct inode_fs *i_directory,*/ filesystem_t *private_data) {
+/* Muestra el contenido de un directorio direccionado por un path */
+void read_directory (char *path, filesystem_t *private_data) {
 
 	int i = 0;
 	int j, encontrado = 0;
@@ -29,7 +29,7 @@ void read_directory (/*char *name,*/ char *path, /*struct inode_fs *i_directory,
 		// Recorremos entradas
 		printf(" tipo: %c  permisos: %d  id: %ld  tam: %d  links: %d  nombre: %s\n", private_data->inode[entry[0].inode].i_type, private_data->inode[entry[0].inode].i_permisos, private_data->inode[entry[0].inode].i_num, private_data->inode[entry[0].inode].i_tam, private_data->inode[entry[0].inode].i_links, entry[0].name);
 		printf(" tipo: %c  permisos: %d  id: %ld  tam: %d  links: %d  nombre: %s\n", private_data->inode[entry[1].inode].i_type, private_data->inode[entry[1].inode].i_permisos, private_data->inode[entry[1].inode].i_num, private_data->inode[entry[1].inode].i_tam, private_data->inode[entry[1].inode].i_links, entry[1].name);
-		for (j = 2; j < 128 && (entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode > 0) && !encontrado; j++) {
+		for (j = 2; j < 128 && (entry[j].inode <= private_data->superblock->num_inodes && entry[j].inode > 0) && !encontrado; j++) {
 			printf(" tipo: %c  permisos: %d  id: %ld  tam: %d  links: %d  nombre: %s\n", private_data->inode[entry[j].inode].i_type, private_data->inode[entry[j].inode].i_permisos, private_data->inode[entry[j].inode].i_num, private_data->inode[entry[j].inode].i_tam, private_data->inode[entry[j].inode].i_links, entry[j].name);
 		}
 
@@ -42,7 +42,7 @@ void read_directory (/*char *name,*/ char *path, /*struct inode_fs *i_directory,
 			printf("Contenido del directorio:\n");
 
 			// Recorremos entradas
-			for (j = 0; j < 128 && (entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode > 0) && !encontrado; j++) {
+			for (j = 0; j < 128 && (entry[j].inode <= private_data->superblock->num_inodes && entry[j].inode > 0) && !encontrado; j++) {
 				printf(" tipo: %c  permisos: %d  id: %ld  tam: %d  links: %d  nombre: %s\n", private_data->inode[entry[j].inode].i_type, private_data->inode[entry[j].inode].i_permisos, private_data->inode[entry[j].inode].i_num, private_data->inode[entry[j].inode].i_tam, private_data->inode[entry[j].inode].i_links, entry[j].name);
 			}
 
@@ -53,37 +53,3 @@ void read_directory (/*char *name,*/ char *path, /*struct inode_fs *i_directory,
 	}
 
 }
-
-
-/*
-char *read_directory(char *nombre,struct inode_fs *directory, struct block_bitmap_fs *bitmapb){
-	int i, j;
-	char *contenido;
-	struct inode_fs *inodo;
-	if(strcmp(nombre, "/")){
-		inodo = inode_search(nombre, directory, bitmapb);
-	}else{
-		inodo = directory;
-	}
-
-	if(inodo == NULL){
-		printf("No existe el directorio %s en este directorio\n", nombre);
-	}else{
-		struct directory_entry *aux = malloc(sizeof(struct directory_entry));
-		char* buffer;
-		for(i = 0; i < N_DIRECTOS && inodo->i_directos[i] != -1; i++){
-			printf("Entradas puntero %d de %s:\n", i, nombre);
-			memcpy(aux, bitmapb->map[inodo->i_directos[i]], sizeof(struct directory_entry));
-			for(j = 0; j < 32 && aux->inode != NULL; j++){
-				printf("Entrada %s %d: Nombre: %s, %d\n",nombre,i, aux->name, aux->inode->i_num);
-				fflush(stdout);
-				if(j+1 < 32)
-				memcpy(aux, bitmapb->map[inodo->i_directos[i]]+sizeof(struct directory_entry)*(j+1), sizeof(struct directory_entry));
-			}
-		}
-		free(aux);
-	}
-
-	return NULL;
-}
-*/

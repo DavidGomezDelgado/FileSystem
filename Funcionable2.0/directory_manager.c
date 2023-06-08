@@ -5,9 +5,7 @@
 #include <errno.h>
 #include "filesystem.h"
 
-// FUNCIÓN ENTRY_SEARCH QUE DEVUELVA ENTRADA DE UN INODO
-
-/* Creamos directorio a partir de un path */
+/* Creación de un directorio a partir de un path */
 int make_dir (char *name, char *path, filesystem_t *private_data) {
 
 	struct inode_fs *i_directory;
@@ -43,8 +41,7 @@ int make_dir (char *name, char *path, filesystem_t *private_data) {
 			entry[1].inode = i_directory->i_num;
 
 		} else {
-			//printf("Ya existe el fichero o directorio\n");
-			res = -1;
+			res = -1;   // si no existe
 		}
 
 	}
@@ -53,6 +50,7 @@ int make_dir (char *name, char *path, filesystem_t *private_data) {
 
 }
 
+/* Eliminación de un directorio a partir del path del directorio que lo contiene */
 int rm_dir (char *name, char *path, filesystem_t *private_data) {
 
 	int res = 0, vacio = 0;

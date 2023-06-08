@@ -19,7 +19,7 @@ struct inode_fs *inode_search (char *name, struct inode_fs *directory, filesyste
 		entry = (struct directory_entry *) private_data->block[directory->i_directos[i] - private_data->superblock->reserved_block];
 
 		// Recorremos entradas
-		for (j = 0; j < 128 && (entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode >= 0) && !encontrado; j++) {
+		for (j = 0; j < 128 && (entry[j].inode <= private_data->superblock->num_inodes && entry[j].inode >= 0) && !encontrado; j++) {
 			if(strcmp(entry[j].name, name) == 0) {
 				inode = &private_data->inode[entry[j].inode];
 				encontrado = 1;

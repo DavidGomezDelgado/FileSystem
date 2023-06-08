@@ -127,7 +127,7 @@ int rename_file (char *path, char *new_name, filesystem_t *private_data) {
 		for (i = 0; i < N_DIRECTOS && (i_directory->i_directos[i] != 0) && !encontrado; i++) {
 			entry = (struct directory_entry *) private_data->block[i_directory->i_directos[i] - private_data->superblock->reserved_block];
 
-			for (j = 0; j < max_entries && (entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode >= 0) && !encontrado; j++) {
+			for (j = 0; j < max_entries && (entry[j].inode <= private_data->superblock->num_inodes && entry[j].inode >= 0) && !encontrado; j++) {
 				// Comprobamos el nombre
 				if (strcmp(entry[j].name, base) == 0) {
 					strcpy(entry[j].name, new_name);
