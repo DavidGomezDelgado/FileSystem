@@ -149,7 +149,7 @@ int rename_file (char *path, char *new_name, filesystem_t *private_data) {
 void clean_inode (struct inode_fs *inodo, filesystem_t *private_data) {
 
 	int byte, bit, i;
-
+	inodo->i_tam = 0;
 	// Recorremos los punteros directos
 	for (i = 0; i < N_DIRECTOS && inodo->i_directos[i] != 0; i++) {
 		// Seteamos a NULL el bloque

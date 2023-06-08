@@ -590,18 +590,55 @@ static int fs_write (const char *path, const char *buf, size_t size, off_t offse
 }
 
 /************************
- ---- ULTIMENS FUNCTION ----
+ ---- UTIMENS FUNCTION ----
  ************************/
 
 static int fs_utimens(const char *path, const struct timespec tv[2])
 {
-	(void)  path;
-	(void) tv[2];
+	/*(void)  path;
+	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
+
+	struct stat *stbuf;
+	int res;
+	res = fs_getattr(path, stbuf);
+	if(res != 0){
+		return res;
+	}
+	
+	stbuf -> st_atime = private_data -> st_atime;
+	stbuf -> st_mtime = private_data -> st_mtime;
+	stbuf -> st_ctime = private_data -> st_ctime;*/
+	
    	return 0;
 }
+/************************
+ ---- TRUNCATE FUNCTION ----
+ ************************/
 
+static int fs_truncate (const char *path, off_t offset){
+	int res = 0;
+	struct inode_fs *inode;
+	char path_aux[70], path_aux2[70], base[70], dir[70];
 
+	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
 
+	strcpy(path_aux, path);
+	strcpy(path_aux2, path);
+
+	// Obtenemos el archivo actual y el path hasta su padre
+	strcpy(base, basename(path_aux));
+	strcpy(dir, dirname(path_aux));
+
+	inode = inode_search_path(path_aux2, private_data);
+	if(inode == NULL){
+		return(ENOENT);
+	}
+	
+	inode->i_tam = 0;
+	
+	return res;
+
+}
 
 /*************************
  ---- FUSE OPERATIONS ----
@@ -620,7 +657,8 @@ static struct fuse_operations basic_oper = {
 	.create		= fs_create,
 	.unlink		= fs_unlink,
 	.rename		= fs_rename,
-	.utimens	= fs_utimens, //no hace nada, no controlamos la fecha de creación
+	.utimens	= fs_utimens, //no hace nada, no controlamos la fecha de creación, siempre es la del fichero formateado
+	.truncate	= fs_truncate,
 	
 };
 

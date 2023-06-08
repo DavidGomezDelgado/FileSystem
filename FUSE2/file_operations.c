@@ -6,6 +6,7 @@
 #include <libgen.h>
 #include "filesystem.h"
 
+
 // MODIFICAR SEGÚN FUNCIÓN WRITE DE FUSE
 size_t file_edit(const char *contenido, char *path, size_t size, off_t offset, filesystem_t *private_data){
 	char* cadena;
