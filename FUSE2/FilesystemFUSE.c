@@ -29,9 +29,6 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 	char path_aux[70], base[70], dir[70];
 
 	strcpy(path_aux, path);
-	
-//	strcpy(base, basename(path_aux));
-//	strcpy(dir, dirname(path_aux));
 
 	memset(stbuf, 0, sizeof(struct stat));
 	int num_blocks = 0, i;
@@ -116,9 +113,6 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
 
 	strcpy(path_aux, path);
-
-//	strcpy(base, basename(path_aux));
-//	strcpy(dir, dirname(path_aux));
 
 	if (strcmp(path, "/") == 0) {
 		
@@ -332,11 +326,6 @@ static int fs_open (const char *path, struct fuse_file_info *fi) {
 	strcpy(base, basename(path_aux));
 	strcpy(dir, dirname(path_aux));
 
-	// Comprobamos si podemos crearlo
-	//if ((fi -> flags & 3) == O_RDWR | O_CREAT) {   // O_CREAT -> Si no existe lo crea
-	// ¿Podemos crear el fichero aquí? -> se hace en fs_mknod
-	//}
-
 	// Una vez creado obtenemos inodo del fichero
 	inode = inode_search_path(path_aux2, private_data);
 
@@ -364,55 +353,10 @@ static int fs_open (const char *path, struct fuse_file_info *fi) {
 }
 
 
-/************************
- ---- MKNOD FUNCTION ----
- ************************/
-/*
-static int fs_mknod (const char *path, mode_t mode, dev_t dev) {
-
-	printf("\n---- Entering fs_mknod function...\n");
-
-	int res = 0;
-	struct inode_fs *inode;
-
-	char path_aux[70], path_aux2[70], base[70], dir[70];
-
-	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
-
-	strcpy(path_aux, path);
-	strcpy(path_aux2, path);
-
-	// Obtenemos el archivo actual y el path hasta su padre
-	strcpy(base, basename(path_aux));
-	strcpy(dir, dirname(path_aux));
-
-	printf("-- fs_mknod mode: %d\n", mode & 3);
-
-	// Comprobamos si podemos crearlo
-	//if ((fi -> flags & 3) == O_RDWR | O_CREAT) {   // O_CREAT -> Si no existe lo crea
-	if (touch(base, dir, private_data) == -1) {  // Pero ya comprobamos si existe en touch (?)
-		printf("--fs_mknod YA EXISTE");
-		return -EEXIST;
-	}
-
-	inode = inode_search_path(path_aux2, private_data);
-
-	printf("-- fs_mknod tipo: %c\n", inode->i_type);
-
-	printf("---- File created successfully \\^o^/ !\n");
-
-	return res;
-
-}
-*/
-
-
 /*************************
  ---- CREATE FUNCTION ----
  *************************/
 
-// Creo que es más adecuada que mknod
-// Necesitaría además la implementación setattr, pero funciona
 static int fs_create (const char *path, mode_t mode, struct fuse_file_info *fi) {
 
 	printf("\n---- Entering fs_create function...\n");
@@ -513,7 +457,6 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
 	inode = inode_search_path(path_aux2, private_data);
 	i_directory = inode_search_path(dir, private_data);
 
-	// PROBAR CON fi->fh  (tiene que ser > 0)
 	if (inode == NULL || i_directory == NULL) {
 		return -ENOENT;
 	} else if (inode->i_type == 'd') {
@@ -573,7 +516,6 @@ static int fs_write (const char *path, const char *buf, size_t size, off_t offse
 	i_directory = inode_search_path(dir, private_data);
 	inode = inode_search_path(path_aux2, private_data);
 
-	// PROBAR CON fi->fh  (tiene que ser > 0)
 	if (inode == NULL || i_directory == NULL) {
 		return -ENOENT;
 	} else if (inode->i_type == 'd') {
@@ -648,12 +590,10 @@ static struct fuse_operations basic_oper = {
 	.getattr	= fs_getattr,
 	.readdir	= fs_readdir,
 	.open		= fs_open,
-	//.release	= fs_release,
 	.read		= fs_read,
 	.write		= fs_write,
 	.rmdir		= fs_rmdir,
 	.mkdir		= fs_mkdir,
-	//.mknod		= fs_mknod,
 	.create		= fs_create,
 	.unlink		= fs_unlink,
 	.rename		= fs_rename,
@@ -675,10 +615,10 @@ int main (int argc, char *argv[]) {
 	if ((argc < 3) || (argv[argc-2][0] == '-') || (argv[argc-1][0] == '-')) error_parametros();
 	printf("%s\n", argv[2]);
 	
-	// NOS DA ERROR INVALID ARGUMENT: punto_montaje
+
 	printf("%s\n", argv[1]);
-	file = open(argv[argc-2], O_RDWR /*0666*/);
-	//file = open("filesystem.img", O_RDWR, 0666);
+	file = open(argv[argc-2], O_RDWR);
+	//file = open("filesystem.img", O_RDWR);
 	if (file == -1) {
 		perror("Error al abrir el archivo");
 		exit(EXIT_FAILURE);
@@ -710,6 +650,7 @@ int main (int argc, char *argv[]) {
 	private_data -> st_ctime = fileStat.st_ctime;
 	private_data -> st_mtime = fileStat.st_mtime;
 	
+	// Prueba a mostrar contenido de root
 	struct inode_fs *root = &private_data->inode[0];
 	struct directory_entry *entries = (struct directory_entry *) private_data->block[root->i_directos[0] - private_data->superblock->reserved_block];
 	int i;

@@ -10,20 +10,18 @@
 //#define N_DOBLES 1
 //#define N_TRIPLES 1
 
-#define NUM_BLOCKS 1048576 //(4GB) = 1048576 * 4096
-#define NUM_INODES 16777216 //1073741824÷64
-
 #define BLOCK_SIZE 4096
 #define MAGIC_N 123456
 
 #define max_entries (BLOCK_SIZE / sizeof(struct directory_entry *))
 
-
+/* Estructura de entrada de directorio */
 struct directory_entry{
 	char name[28];
 	long inode;
 };
 
+/* Estructura de inodo */
 struct inode_fs{
 	long i_num;
 	char i_type;
@@ -35,16 +33,16 @@ struct inode_fs{
 };
 
 
-// Estructura que reutilizamos para bitmapb y bitmapi
+/* Estructura de bitmap, tanto para inodos como para bloques */
 struct bitmap_t{
 	unsigned char *array;
 	unsigned long long size;
 };
 
-// Estructura bloque de datos
-// bloque con datos
+/* Estructura de bloque de datos */
 typedef unsigned char block_t[BLOCK_SIZE];
 
+/* Estructura de superbloque con metadatos */
 struct superblock_fs {
 	unsigned long magic_number;
 	unsigned long bitmapb_offset;
@@ -60,6 +58,7 @@ struct superblock_fs {
     unsigned long reserved_block;
 };
 
+/* Estructura de nuestro sistema de ficheros */
 typedef struct {
 	struct superblock_fs *superblock;
 	struct bitmap_t inode_bitmap;
@@ -115,26 +114,5 @@ void read_directory(char *, filesystem_t *);
 
 // error.c
 void error_parametros();
-
-//
-// //file_manager.c
-// void touch (char *, char, char *, struct inode_fs *, struct inode_bitmap_fs *, struct block_bitmap_fs *);
-// void print_directory(struct inode_fs);
-// void clean_inode(struct inode_fs *, struct block_bitmap_fs *);
-// void rename_file(char *, char *, struct inode_fs *, struct block_bitmap_fs* );
-//
-// //tree_manager.c
-// struct inode_fs *inode_search(char *, struct inode_fs *, struct block_bitmap_fs *);
-// struct inode_fs *_inode_search(char *, char *, struct inode_fs, struct block_bitmap_fs);
-//
-// //file_remove.c
-// void rm (char *, struct inode_fs *, struct inode_bitmap_fs *, struct block_bitmap_fs *);
-//
-// //file_operations.c
-// void file_edit(char *, char *, struct inode_fs *, struct block_bitmap_fs *);
-// char *read_file(char *,struct inode_fs *, struct block_bitmap_fs *);
-//
-// //directory_operations.c
-// char *read_directory(char *,struct inode_fs *, struct block_bitmap_fs *);
 
 #endif
