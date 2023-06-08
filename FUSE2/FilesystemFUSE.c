@@ -21,7 +21,7 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 
 	printf("---- Entering mi_getattr function...\n");
 	printf("---- fs_getattr - Path: %s\n", path);
-
+	fflush(stdout);
 	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
 
 	struct inode_fs *inode;
@@ -34,6 +34,7 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 //	strcpy(dir, dirname(path_aux));
 
 	memset(stbuf, 0, sizeof(struct stat));
+	int num_blocks = 0, i;
 	
 	// Inicializamos atributos de /
 	if (strcmp(path, "/") == 0) {
@@ -49,7 +50,11 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 		stbuf -> st_ctime = private_data -> st_ctime;
 
 		stbuf -> st_size = private_data->inode[0].i_tam;
-		stbuf -> st_blocks = 8;
+		
+		for(i = 0; i < N_DIRECTOS && private_data->inode[0].i_directos[i] != 0; i++){
+			num_blocks = num_blocks + 8;
+		}
+		stbuf -> st_blocks = num_blocks;
 
 	} else {
 
@@ -78,8 +83,10 @@ static int fs_getattr (const char *path, struct stat *stbuf) {
 		stbuf -> st_ctime = private_data -> st_ctime;
 
 		stbuf -> st_size = inode->i_tam;
-		stbuf -> st_blocks = 8;
-
+		for(i = 0; i < N_DIRECTOS && inode->i_directos[i] != 0; i++){
+			num_blocks = num_blocks + 8;
+		}
+		stbuf -> st_blocks = num_blocks;
 	}
 	
 	printf("---- Attributes set successfully \\^o^/ !\n");
@@ -138,7 +145,7 @@ static int fs_readdir (const char *path, void *buf, fuse_fill_dir_t filler, off_
 			entry = (struct directory_entry *) private_data->block[private_data->inode[0].i_directos[i] - private_data->superblock->reserved_block];
 
 			j = 0;
-			while (j < max_entries && entry[j].inode <= private_data->inode_bitmap.size && entry[j].inode > 0) {
+			while (j < max_entries && entry[j].inode <= private_data->superblock->num_inodes && entry[j].inode > 0) {
 				// Indicamos qué entradas deben estar en el path 
 				if (filler(buf, entry[j].name, NULL, 0) != 0) {   // filler le dice al resto del sistema que existen tales entradas, NO LAS CREA
 					break;
@@ -241,7 +248,7 @@ static int fs_mkdir (const char *path, mode_t mode) {
 
 static int fs_rmdir (const char *path) {
 
-	printf("\n---- Entering fs_mkdir function...\n");
+	printf("\n---- Entering fs_rmdir function...\n");
 
 	int res = 0;
 	char path_aux[70], base[70], dir[70];
@@ -277,7 +284,7 @@ static int fs_rename (const char *oldpath, const char *newpath/*, unsigned int f
 
 	int res = 0;
 	struct inode_fs *inode;
-	struct directort_entry *entry;
+	struct directory_entry *entry;
 	char newpath_aux[70], oldpath_aux[70], base[70], dir[70];
 
 	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
@@ -337,17 +344,19 @@ static int fs_open (const char *path, struct fuse_file_info *fi) {
 		return -ENOENT;
 	} else {
 		// Guardamos el índice de inodo para no tener que buscarlo en read
-		fi -> fh = private_data->inode[inode->i_num].i_num;
+		fi -> fh = inode->i_num;
 		printf("--fs_open inodo: %ld  fi -> fh: %lu\n", private_data->inode[inode->i_num].i_num, fi -> fh);
 	}
 	
 	printf("--fs_open flags: %d O_RDONLY: %d O_WRONLY: %d O_RDWR: %d O_CREAT: %d\n", fi->flags & 3, O_RDONLY, O_WRONLY, O_RDWR, O_CREAT);
 
 	// Comprobamos si tenemos acceso a lectura y escritura
-	if ((fi -> flags & 3) != O_RDWR) {   // los 3 lsb son los modos de open (append, read only,...)
-		return -EACCES;
+	
+	if ((fi->flags & 3) != O_RDWR && (fi->flags & 3) != O_WRONLY && (fi->flags & 3) != O_RDONLY) {
+    		return -EACCES;
 	}
 
+	fflush(stdout);
 	printf("---- File opened successfully \\^o^/ !\n");
 
 	return res;
@@ -431,7 +440,7 @@ static int fs_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
 
 	// Guardamos el índice de inodo para no tener que buscarlo en otra operación
 	fi->fh = private_data->inode[inode->i_num].i_num;
-
+	
 	printf("---- File created successfully \\^o^/ !\n");
 
 	return res;
@@ -505,7 +514,7 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
 	i_directory = inode_search_path(dir, private_data);
 
 	// PROBAR CON fi->fh  (tiene que ser > 0)
-	if (inode == NULL) {
+	if (inode == NULL || i_directory == NULL) {
 		return -ENOENT;
 	} else if (inode->i_type == 'd') {
 		return -EISDIR;
@@ -539,11 +548,16 @@ static int fs_read(const char *path, char *buf, size_t size, off_t offset, struc
  
 // size: tamaño en bytes a escribir,  offset: posición del fichero en la que escribir
 static int fs_write (const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
-
+	
+	if(offset != 0){
+		printf("Todavía no se puede escribir a partir del offset\n");
+		return 0;
+	}
 	printf("\n---- Entering fs_write function...\n");
 
 	struct inode_fs *inode;
-	char path_aux[70], path_aux2[70], base[70], dir[70], content[size];
+	struct inode_fs *i_directory;
+	char path_aux[70], path_aux2[70], base[70], dir[70];
 
 	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
 
@@ -556,24 +570,38 @@ static int fs_write (const char *path, const char *buf, size_t size, off_t offse
 
 	printf("--fs_write buffer a escibir: %s\n", buf);
 
+	i_directory = inode_search_path(dir, private_data);
 	inode = inode_search_path(path_aux2, private_data);
 
 	// PROBAR CON fi->fh  (tiene que ser > 0)
-	if (inode == NULL) {
+	if (inode == NULL || i_directory == NULL) {
 		return -ENOENT;
 	} else if (inode->i_type == 'd') {
 		return -EISDIR;
 	} else {
-		memcpy(content, buf, size);
-		file_edit(content, path_aux2, private_data);
+		size = file_edit(buf, path_aux2, size,offset, private_data);
 	}
+	
 
 	printf("---- File wrote successfully \\^o^/ !\n");
-
+	
 	return size;
 
 }
- 
+
+/************************
+ ---- ULTIMENS FUNCTION ----
+ ************************/
+
+static int fs_utimens(const char *path, const struct timespec tv[2])
+{
+	(void)  path;
+	(void) tv[2];
+   	return 0;
+}
+
+
+
 
 /*************************
  ---- FUSE OPERATIONS ----
@@ -592,6 +620,8 @@ static struct fuse_operations basic_oper = {
 	.create		= fs_create,
 	.unlink		= fs_unlink,
 	.rename		= fs_rename,
+	.utimens	= fs_utimens, //no hace nada, no controlamos la fecha de creación
+	
 };
 
 /**********************

@@ -7,16 +7,11 @@
 #include "filesystem.h"
 
 // MODIFICAR SEGÚN FUNCIÓN WRITE DE FUSE
-void file_edit(char *contenido, char *path, /*char *name, struct inode_fs *directory,*/ filesystem_t *private_data){
+size_t file_edit(const char *contenido, char *path, size_t size, off_t offset, filesystem_t *private_data){
 	char* cadena;
 	struct inode_fs *inode;
-	unsigned long i, j, k, buffer = strlen(contenido) + 1, bloques;
+	unsigned long i, j, k, buffer = size, bloques;
 	char path_aux[70], dir[70], base[70];
-
-	if(buffer > BLOCK_SIZE*10){
-		printf("La cadena que quiere introducir es demasiado grande\n");
-		return;
-	}
 
 	strcpy(path_aux, path);
 
@@ -27,23 +22,21 @@ void file_edit(char *contenido, char *path, /*char *name, struct inode_fs *direc
 	// Obtenemos inodo del fichero o directorio
 	inode = inode_search_path(path, private_data);
 
-	if(inode->i_type == 'd'){
-		printf("Esto es un directorio, no es un fichero con contenido");
-		return;
-	}
 	if(strcmp(contenido, "") != 0){
-		if(inode == NULL){
-			printf("No existe el fichero \n");
-			return;
-		}
+		
 		clean_inode(inode, private_data);
+		if(buffer > BLOCK_SIZE*10-1){
+			buffer = BLOCK_SIZE*10-1;
+		}
 		inode->i_tam = buffer;
 		if(buffer < BLOCK_SIZE){
+			
 			inode->i_directos[0] = free_bit(&(private_data->block_bitmap));
 			cadena = (char *) private_data->block[inode->i_directos[0] - private_data->superblock->reserved_block];
-			for(j = 0; j< buffer-1; j++){
-				cadena[j] = contenido[j];
-			}
+			//for(j = offset; j< buffer-1; j++){
+			//	cadena[j] = contenido[j];
+			//}
+			memcpy(cadena, contenido, buffer);
 		}else{
 			if(buffer%BLOCK_SIZE == 0){
 				bloques = buffer/BLOCK_SIZE;
@@ -66,13 +59,13 @@ void file_edit(char *contenido, char *path, /*char *name, struct inode_fs *direc
 				cadena[j] = contenido[BLOCK_SIZE*(bloques-1) + k];
 			}
 		}
-		cadena[buffer-1] = '\0';
+		cadena[buffer-1] = '\n';
 
 	}else{
 		printf("No hay contenido para escribir\n");
 	}
 	fflush(stdout);
-	return;
+	return buffer;
 }
 
 //BORRAR
@@ -137,11 +130,11 @@ char *read_file(char *name, struct inode_fs *directory, filesystem_t *private_da
 	else{
 		cadenaFinal =  (char *)malloc(BLOCK_SIZE);
 		for(i = 0; i < N_DIRECTOS && inodo->i_directos[i] != 0 && finCadena; i++){
-			if(private_data->block[inodo->i_directos[i] - private_data->superblock->reserved_block] == NULL) finCadena = 0;
-			else {
+			//if(private_data->block[inodo->i_directos[i] - private_data->superblock->reserved_block] == NULL) finCadena = 0;
+			//else {
 				contenido = (char *) private_data->block[inodo->i_directos[i] - private_data->superblock->reserved_block];
 				strncat(cadenaFinal, contenido, BLOCK_SIZE);
-			}
+			//}
 
 		}
 		//printf("La cadena es: \n%s\n", cadenaFinal);

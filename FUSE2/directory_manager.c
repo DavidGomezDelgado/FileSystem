@@ -14,7 +14,7 @@ int make_dir (char *name, char *path, filesystem_t *private_data) {
 	struct inode_fs *existente;
 	struct inode_fs *inode;
 	struct directory_entry *entry;
-	int i, encontrado = 0, res= 0;
+	int res= 0;
 
 	if (strncmp(name, ".", 1) == 0){
 		printf("El nombre no puede empezar por .\n");
@@ -40,12 +40,6 @@ int make_dir (char *name, char *path, filesystem_t *private_data) {
 
 			// Modificamos entrada .. para que apunte a su padre
 			entry = (struct directory_entry *) private_data->block[inode->i_directos[0] - private_data->superblock->reserved_block];
-			/*for (i = 0; i < max_entries && (entry[i].inode <= private_data->superblock->inodes_ocupados && entry[i].inode >= 0) && !encontrado; i++) {
-				if (strcmp(entry[i].name, "..") == 0) {
-					entry[i].inode = i_directory->i_num;
-					encontrado = 1;
-				}
-			}*/
 			entry[1].inode = i_directory->i_num;
 
 		} else {

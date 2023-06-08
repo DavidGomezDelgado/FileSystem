@@ -224,12 +224,12 @@ int main(int argc, char *argv[]){
 	printf("Se guardan bien :D\n");
 
 
-	file_edit("Hola", "/fichero2", private_data);
+	file_edit("Hola", "/fichero2", strlen("Hola"), 0,private_data);
 	char *cadena = read_file("fichero2", root, private_data);
-	printf("La cadena es:\n%s\n",cadena);
-	file_edit(":)", "/fichero2", private_data);
+	printf("La cadena es:\n%s",cadena);
+	file_edit(":)", "/fichero2",strlen(":)"),0, private_data);
 	char *cadena2 = read_file("fichero2", root, private_data);
-	printf("La cadena es:\n%s\n",cadena2);
+	printf("La cadena es:\n%s",cadena2);
 
 	fflush(stdout);
 

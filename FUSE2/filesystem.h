@@ -107,7 +107,7 @@ void remove_inode (struct inode_fs *, filesystem_t *);
 int rm (char *, filesystem_t *);
 
 // file_operations.c
-void file_edit(char *, char *, filesystem_t *);
+size_t file_edit(const char *, char *, size_t, off_t,filesystem_t *);
 char *read_file(char *, struct inode_fs*, filesystem_t *);
 
 // directory_operations.c
