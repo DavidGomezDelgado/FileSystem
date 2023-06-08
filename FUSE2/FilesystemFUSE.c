@@ -360,7 +360,7 @@ static int fs_open (const char *path, struct fuse_file_info *fi) {
 /************************
  ---- MKNOD FUNCTION ----
  ************************/
-
+/*
 static int fs_mknod (const char *path, mode_t mode, dev_t dev) {
 
 	printf("\n---- Entering fs_mknod function...\n");
@@ -391,6 +391,48 @@ static int fs_mknod (const char *path, mode_t mode, dev_t dev) {
 	inode = inode_search_path(path_aux2, private_data);
 
 	printf("-- fs_mknod tipo: %c\n", inode->i_type);
+
+	printf("---- File created successfully \\^o^/ !\n");
+
+	return res;
+
+}
+*/
+
+
+/*************************
+ ---- CREATE FUNCTION ----
+ *************************/
+
+// Creo que es más adecuada que mknod
+// Necesitaría además la implementación setattr, pero funciona
+static int fs_create (const char *path, mode_t mode, struct fuse_file_info *fi) {
+
+	printf("\n---- Entering fs_create function...\n");
+
+	int res = 0;
+	struct inode_fs *inode;
+	char path_aux[70], path_aux2[70], base[70], dir[70];
+
+	filesystem_t *private_data = (filesystem_t *) fuse_get_context() -> private_data;
+
+	strcpy(path_aux, path);
+	strcpy(path_aux2, path);
+
+	// Obtenemos el archivo actual y el path hasta su padre
+	strcpy(base, basename(path_aux));
+	strcpy(dir, dirname(path_aux));
+
+	// Comprobamos si podemos crearlo
+	if (touch(base, dir, private_data) == -1) {  // Pero ya comprobamos si existe en touch (?)
+		printf("--fs_mknod YA EXISTE");
+		return -EEXIST;
+	}
+
+	inode = inode_search_path(path_aux2, private_data);
+
+	// Guardamos el índice de inodo para no tener que buscarlo en otra operación
+	fi->fh = private_data->inode[inode->i_num].i_num;
 
 	printf("---- File created successfully \\^o^/ !\n");
 
@@ -460,7 +502,8 @@ static struct fuse_operations basic_oper = {
 	//.write	= fs_write,
 	.rmdir		= fs_rmdir,
 	.mkdir		= fs_mkdir,
-	.mknod		= fs_mknod,
+	//.mknod		= fs_mknod,
+	.create		= fs_create,
 	.unlink		= fs_unlink,
 	.rename		= fs_rename,
 };

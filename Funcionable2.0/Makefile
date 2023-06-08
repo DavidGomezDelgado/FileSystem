@@ -26,7 +26,7 @@ image:
 	dd if=/dev/zero of=../FUSE2/filesystem.img bs=4096 count=$(COUNT)
 
 clean:
-	rm -f *.o $(OBJECT) $(TARGET) ../FUSE/filesystem.img
+	rm -f *.o $(OBJECT) $(TARGET) ../FUSE2/filesystem.img
 	
 .PHONY: image clean
 
